@@ -59,32 +59,32 @@ begin 					return KW_BEGIN;
 end						return KW_END;
 
 
-and					return KW_AND;
-div					return KW_DIV;
+and						return KW_AND;
+div						return KW_DIV;
 function				return KW_FUNCTION;
-mod					return KW_MOD;
+mod						return KW_MOD;
 procedure				return KW_PROCEDURE;
 result					return KW_RESULT;
 array					return KW_ARRAY;
-do					return KW_DO;
+do						return KW_DO;
 goto					return KW_GOTO;
 not 					return KW_NOT;
 return					return KW_RERURN;
 boolean					return KW_BOOLEAN;
 else					return KW_ELSE;
-if					return KW_IF;
-of					return KW_OF;
+if						return KW_IF;
+of						return KW_OF;
 real					return KW_REAL;
 then					return KW_THEN;
 char					return KW_CHAR;
-for					return KW_FOR;
+for						return KW_FOR;
 integer					return KW_INTEGER;
-or					return KW_OR;
+or						return KW_OR;
 repeat					return KW_REPEAT;
 until					return KW_UNTIL;
-var					return KW_VAR;
+var						return KW_VAR;
 while					return KW_WHILE;
-to					return KW_TO;
+to						return KW_TO;
 downto					return KW_DOWNTO;
 
 
