@@ -49,37 +49,9 @@ extern int yydebug;
     POSINT = 259,
     REAL = 260,
     STRING = 261,
-    BOOL = 262,
-    KW_PROGRAM = 263,
-    KW_BEGIN = 264,
-    KW_END = 265,
-    KW_AND = 266,
-    KW_DIV = 267,
-    KW_FUNCTION = 268,
-    KW_MOD = 269,
-    KW_PROCEDURE = 270,
-    KW_RESULT = 271,
-    KW_ARRAY = 272,
-    KW_DO = 273,
-    KW_GOTO = 274,
-    KW_NOT = 275,
-    KW_RERURN = 276,
-    KW_BOOLEAN = 277,
-    KW_ELSE = 278,
-    KW_IF = 279,
-    KW_OF = 280,
-    KW_REAL = 281,
-    KW_THEN = 282,
-    KW_CHAR = 283,
-    KW_FOR = 284,
-    KW_INTEGER = 285,
-    KW_OR = 286,
-    KW_REPEAT = 287,
-    KW_UNTIL = 288,
-    KW_VAR = 289,
-    KW_WHILE = 290,
-    KW_TO = 291,
-    KW_DOWNTO = 292
+    KW_PROGRAM = 262,
+    KW_BEGIN = 263,
+    KW_END = 264
   };
 #endif
 
@@ -91,9 +63,8 @@ union YYSTYPE
 #line 11 "ptucc_parser.y" /* yacc.c:1909  */
 
 	char* crepr;
-	int boolConstant;
 
-#line 97 "ptucc_parser.tab.h" /* yacc.c:1909  */
+#line 68 "ptucc_parser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

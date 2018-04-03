@@ -10,47 +10,17 @@ extern int line_num;
 %union
 {
 	char* crepr;
-	int boolConstant;
 }
-
 
 
 %token <crepr> IDENT
 %token <crepr> POSINT 
 %token <crepr> REAL 
 %token <crepr> STRING
-%token <boolConstant> BOOL
 
 %token KW_PROGRAM 
 %token KW_BEGIN 
 %token KW_END
-%token KW_AND
-%token KW_DIV
-%token KW_FUNCTION
-%token KW_MOD
-%token KW_PROCEDURE
-%token KW_RESULT
-%token KW_ARRAY
-%token KW_DO
-%token KW_GOTO
-%token KW_NOT
-%token KW_RERURN
-%token KW_BOOLEAN
-%token KW_ELSE
-%token KW_IF
-%token KW_OF
-%token KW_REAL
-%token KW_THEN
-%token KW_CHAR
-%token KW_FOR
-%token KW_INTEGER
-%token KW_OR
-%token KW_REPEAT
-%token KW_UNTIL
-%token KW_VAR
-%token KW_WHILE
-%token KW_TO
-%token KW_DOWNTO
 
 %start program
 

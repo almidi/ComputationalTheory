@@ -23,14 +23,12 @@ char* get_macro(char* name);
 
 %}
 
-BOOL 		("true"|"false")
-ID 			[a-zA-Z_][0-9a-zA-Z_]*
-DIGIT  		[0-9]
-NUMBER  	{DIGIT}{DIGIT}*
-DECIMAL 	("."{NUMBER})|({NUMBER}("."{NUMBER}?)?)
-REAL    	{DECIMAL}([eE][+-]?{NUMBER})?
-STRING  	'[^'\n]*'
-
+ID [a-zA-Z_][0-9a-zA-Z_]*
+DIGIT  [0-9]
+NUMBER  {DIGIT}{DIGIT}*
+DECIMAL ("."{NUMBER})|({NUMBER}("."{NUMBER}?)?)
+REAL    {DECIMAL}([eE][+-]?{NUMBER})?
+STRING  '[^'\n]*'
 
 %x comment
 %x macro
@@ -60,48 +58,6 @@ program					return KW_PROGRAM;
 begin 					return KW_BEGIN;
 end						return KW_END;
 
-
-and						return KW_AND;
-div						return KW_DIV;
-function				return KW_FUNCTION;
-mod						return KW_MOD;
-procedure				return KW_PROCEDURE;
-result					return KW_RESULT;
-array					return KW_ARRAY;
-do						return KW_DO;
-goto					return KW_GOTO;
-not 					return KW_NOT;
-return					return KW_RERURN;
-boolean					return KW_BOOLEAN;
-else					return KW_ELSE;
-if						return KW_IF;
-of						return KW_OF;
-real					return KW_REAL;
-then					return KW_THEN;
-char					return KW_CHAR;
-for						return KW_FOR;
-integer					return KW_INTEGER;
-or						return KW_OR;
-repeat					return KW_REPEAT;
-until					return KW_UNTIL;
-var						return KW_VAR;
-while					return KW_WHILE;
-to						return KW_TO;
-downto					return KW_DOWNTO;
-
-
-{BOOL}					{
-
-							if (strdup(yytext)[0] == 't'){
-    						yylval.boolConstant = 1;
-    						return BOOL;
-							}
-							if (strdup(yytext)[0] == 'f') {
-    						yylval.boolConstant = 0;
-    						return BOOL;
-							}
-						}
-
 {ID}  					{
 						   char* def = get_macro(yytext);
 						   if(def==NULL) {
@@ -115,8 +71,6 @@ downto					return KW_DOWNTO;
 {NUMBER}				{ yylval.crepr = strdup(yytext); return POSINT; }
 {REAL}					{ yylval.crepr = strdup(yytext); return REAL; }
 {STRING}				{ yylval.crepr = strdup(yytext); return STRING; }
-
-
 
 "+"						return '+';
 
