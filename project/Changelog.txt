@@ -1,0 +1,3 @@
+//4-4-2018
+changed ptucc_lex.l 
+(strings almost done  and some operads)
