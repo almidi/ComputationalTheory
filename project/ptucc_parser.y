@@ -1,6 +1,6 @@
 %{
 #include <stdarg.h>
-#include <stdio.h>	
+#include <stdio.h>
 #include "cgen.h"
 
 extern int yylex(void);

@@ -6,6 +6,9 @@
 #include "cgen.h"
 
 int line_num = 1;
+char buf[100];
+char *s ;
+int counter = 0;
 
 /* 
 	A primitive macro facility:
@@ -29,11 +32,12 @@ DIGIT  		[0-9]
 NUMBER  	{DIGIT}{DIGIT}*
 DECIMAL 	("."{NUMBER})|({NUMBER}("."{NUMBER}?)?)
 REAL    	{DECIMAL}([eE][+-]?{NUMBER})?
-STRING  	'[^'\n]*'
+STRING  	[\'\"]
 
 
 %x comment
 %x macro
+%x string
 
 %%
 
@@ -114,7 +118,23 @@ downto					return KW_DOWNTO;
 						} 						
 {NUMBER}				{ yylval.crepr = strdup(yytext); return POSINT; }
 {REAL}					{ yylval.crepr = strdup(yytext); return REAL; }
-{STRING}				{ yylval.crepr = strdup(yytext); return STRING; }
+{STRING}				{ BEGIN(string); s = buf; *(s+1) = '\0';}
+<string>\\n 			{ *s++ = '\n'; *(s+1) = '\0';}
+<string>\\t				{ *s++ = '\t'; *(s+1) = '\0';}
+<string>\\r 			{ *s++ = '\r'; *(s+1) = '\0';}
+<string>\\\\			{ *s++ = '\\'; *(s+1) = '\0';}
+<string>\\\'			{ *s++ = '\''; *(s+1) = '\0';}
+<string>\\\"			{ *s++ = '\"'; *(s+1) = '\0';}
+<string>{STRING}		{
+							yylval.crepr = strdup(buf);
+						    yytext = strdup(buf);
+							BEGIN(INITIAL);
+							return STRING;
+							
+						}
+<string>\\				{}
+<string>\n				{}
+<string>.				{ *s++ = *yytext; *(s+1) = '\0';}	
 
 
 
@@ -131,6 +151,9 @@ downto					return KW_DOWNTO;
 <comment>"*"+[^*)\n]*   /* eat up '*'s not followed by ')'s */
 <comment>\n             ++line_num;
 <comment>"*"+")"        BEGIN(INITIAL);
+
+
+
 
 
 [ \r\t]					/* skip whitespace */

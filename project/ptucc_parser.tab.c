@@ -65,7 +65,7 @@
 #line 1 "ptucc_parser.y" /* yacc.c:339  */
 
 #include <stdarg.h>
-#include <stdio.h>	
+#include <stdio.h>
 #include "cgen.h"
 
 extern int yylex(void);
