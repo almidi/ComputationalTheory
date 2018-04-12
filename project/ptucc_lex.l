@@ -33,12 +33,15 @@ NUMBER  	{DIGIT}{DIGIT}*
 DECIMAL 	("."{NUMBER})|({NUMBER}("."{NUMBER}?)?)
 REAL    	{DECIMAL}([eE][+-]?{NUMBER})?
 STRING  	[\'\"]
+RELOP		["&&"|"||"|"!"]
+CAST		("(<"[.]*">)")
+
 
 
 %x comment
 %x macro
 %x string
-
+%x line_comment
 %%
 
 @defmacro[ \r\t]+       BEGIN(macro);
@@ -93,7 +96,7 @@ while					return KW_WHILE;
 to						return KW_TO;
 downto					return KW_DOWNTO;
 
-
+{CAST}					{yylval.crepr = strdup(yytext); return CASTING;}
 {BOOL}					{
 
 							if (strdup(yytext)[0] == 't'){
@@ -118,7 +121,9 @@ downto					return KW_DOWNTO;
 						} 						
 {NUMBER}				{ yylval.crepr = strdup(yytext); return POSINT; }
 {REAL}					{ yylval.crepr = strdup(yytext); return REAL; }
+
 {STRING}				{ BEGIN(string); s = buf; *(s+1) = '\0';}
+<string>[^\\n\'\"]*		{*s++ = yytext;}
 <string>\\n 			{ *s++ = '\n'; *(s+1) = '\0';}
 <string>\\t				{ *s++ = '\t'; *(s+1) = '\0';}
 <string>\\r 			{ *s++ = '\r'; *(s+1) = '\0';}
@@ -137,9 +142,26 @@ downto					return KW_DOWNTO;
 <string>.				{ *s++ = *yytext; *(s+1) = '\0';}	
 
 
+- 						return '-';
+"/"						return '/';
+=						return (int)("==");
+"<"						return '<';
+">"						return '>';
+"<="					{yylval.crepr = atoi(yytext); return (int)"<=";}
+"<>"					{yylval.crepr = atoi("!=");return "!=";}
+">="					{yylval.crepr = atoi(yytext);return (int)">=";}
+&&						return KW_AND;
+"||"					return KW_OR;
+"!"						return KW_NOT;
+":="					return '=';
+
+","						return ',';
+"["						return '[';
+"]"						return ']';
+":"						return ':';
+
 
 "+"						return '+';
-
 "*"						return '*';
 ";"						return ';';
 "."						return '.';
@@ -153,7 +175,9 @@ downto					return KW_DOWNTO;
 <comment>"*"+")"        BEGIN(INITIAL);
 
 
-
+"//" 					BEGIN(line_comment);
+<line_comment>[^\n]*    
+<line_comment>\n        BEGIN(INITIAL);
 
 
 [ \r\t]					/* skip whitespace */
