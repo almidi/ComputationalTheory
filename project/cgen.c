@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include "cgen.h"
 
 extern int line_num;
@@ -50,10 +51,27 @@ char* string_ptuc2c(char* P)
 	/* Just chech and change the first and last characters */
 	int Plen = strlen(P);
 	assert(Plen>=2);
+
+	char *S = (char*)malloc((strlen(P)+2)*sizeof(char));
+	int Slen = Plen+2;
+
+	for(int i =0;i<Plen;i++){
+		S[i+1]=P[i];
+	}
+
 	P[0] = '"';
 	P[Plen-1] = '"';
 
-	return P;
+	S[0] = '"';
+	S[Slen-1] = P[Plen-1];
+	S[Slen] = P[Plen];
+
+	yyerror("P: %s\n",P);
+	yyerror("S: %s\n",S);
+
+	P;
+
+	return S;
 }
 
 

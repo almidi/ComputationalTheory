@@ -8,12 +8,8 @@
 int line_num = 1;
 char buf[100];
 char *s ;
-int counter = 0;
 
-/* 
-	A primitive macro facility:
-	just one macro is allowed to be defined! 
-*/
+/* Macro buffer = 32 different macros*/
 #define MAXMACRO 32
 char* mactable[MAXMACRO][2];
 int mactable_size = 0;
@@ -42,23 +38,28 @@ CAST		("(<"[.]*">)")
 %x macro
 %x string
 %x line_comment
+
 %%
 
 @defmacro[ \r\t]+       BEGIN(macro);
 <macro>{ID}             {
-							/* Store macro name */
+							/* Store macro name which is in yytext*/
 							char* name = strdup(yytext);
+							/* Everything from now to the end of line is the macro itself*/
 							char* def = NULL;
 							size_t deflen = 0;
 							char c;
-
+							/*open memory as IO*/
 							FILE* deff = open_memstream(&def, &deflen);
-
+							/* TODO: Use this technique for Strings*/
+							/*Stream everything until '\n' to memory*/
 							while((c=input())!='\n')
 							   fputc(c, deff);
+							/*Close memory IO stream*/   
 							fclose(deff);
-
+							/*Try to set macro using the previously created buffer*/
 							if(!set_macro(name, def))
+								/*if set_macro() fails print error*/
 								yyerror("lexer error: failed to define macro '%s'\n", name);
 							BEGIN(INITIAL);
 						};
@@ -96,7 +97,22 @@ while					return KW_WHILE;
 to						return KW_TO;
 downto					return KW_DOWNTO;
 
-{CAST}					{yylval.crepr = strdup(yytext); return CASTING;}
+{ID}  					{
+						   /* Get the macro */
+						   char* def = get_macro(yytext);
+						   if(def==NULL) {
+						   		yylval.crepr = strdup(yytext);
+						   		/* If no macro found, Return IDENT*/
+						   		/*TODO Check what IDENT is*/
+						   		return IDENT;
+						   }
+						   /*Else put the macro back in yytext to be processed normaly */
+						   for(int i=strlen(def); i>0; i--) {
+						   	  unput(def[i-1]);
+						   }
+						}
+
+{CAST}					{yylval.crepr = strdup(yytext); return CAST;}
 {BOOL}					{
 
 							if (strdup(yytext)[0] == 't'){
@@ -109,37 +125,30 @@ downto					return KW_DOWNTO;
 							}
 						}
 
-{ID}  					{
-						   char* def = get_macro(yytext);
-						   if(def==NULL) {
-						   		yylval.crepr = strdup(yytext);
-						   		return IDENT;
-						   	}
-						   for(int i=strlen(def); i>0; i--) {
-						   	  unput(def[i-1]);
-						   }
-						} 						
 {NUMBER}				{ yylval.crepr = strdup(yytext); return POSINT; }
 {REAL}					{ yylval.crepr = strdup(yytext); return REAL; }
 
-{STRING}				{ BEGIN(string); s = buf; *(s+1) = '\0';}
-<string>[^\\n\'\"]*		{*s++ = yytext;}
-<string>\\n 			{ *s++ = '\n'; *(s+1) = '\0';}
-<string>\\t				{ *s++ = '\t'; *(s+1) = '\0';}
-<string>\\r 			{ *s++ = '\r'; *(s+1) = '\0';}
-<string>\\\\			{ *s++ = '\\'; *(s+1) = '\0';}
-<string>\\\'			{ *s++ = '\''; *(s+1) = '\0';}
-<string>\\\"			{ *s++ = '\"'; *(s+1) = '\0';}
+{STRING}				{ 
+						  BEGIN(string);
+						  s = buf;
+						}
+<string>\\n 			{ *s++ = '\n';}
+<string>\\t				{ *s++ = '\t';}
+<string>\\r 			{ *s++ = '\r';}
+<string>\\\\			{ *s++ = '\\';}
+<string>\\\'			{ *s++ = '\'';}
+<string>\\\"			{ *s++ = '\"';}
 <string>{STRING}		{
+							*s = '\0';
 							yylval.crepr = strdup(buf);
-						    yytext = strdup(buf);
+							yyerror("<string>. '%s'\n", yylval.crepr);
+							yytext = strdup(buf);
 							BEGIN(INITIAL);
 							return STRING;
-							
 						}
 <string>\\				{}
 <string>\n				{}
-<string>.				{ *s++ = *yytext; *(s+1) = '\0';}	
+<string>.				{*s++ = yytext[0];}
 
 
 - 						return '-';
@@ -202,6 +211,7 @@ int set_macro(char* name, char* def)
 			break;
 		}
 	}
+
 	if(i<mactable_size)
 		return 1;
 	else if(mactable_size < MAXMACRO) {

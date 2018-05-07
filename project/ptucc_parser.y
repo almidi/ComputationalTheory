@@ -19,6 +19,7 @@ extern int line_num;
 %token <crepr> POSINT 
 %token <crepr> REAL 
 %token <crepr> STRING
+%token <crepr> CAST
 %token <boolConstant> BOOL
 
 %token KW_PROGRAM 
