@@ -53,6 +53,12 @@ extern int line_num;
 %token KW_TO
 %token KW_DOWNTO
 
+%token ASSIGN
+%left EQUAL
+%left NOT_EQUAL
+%left L_E_T
+%left G_E_T
+
 %start program
 
 %type <crepr> program_decl body statements statement_list

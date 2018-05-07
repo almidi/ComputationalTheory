@@ -30,7 +30,6 @@ DECIMAL 	("."{NUMBER})|({NUMBER}("."{NUMBER}?)?)
 REAL    	{DECIMAL}([eE][+-]?{NUMBER})?
 STRING  	[\'\"]
 RELOP		["&&"|"||"|"!"]
-CAST		("(<"[.]*">)")
 
 
 
@@ -112,7 +111,6 @@ downto					return KW_DOWNTO;
 						   }
 						}
 
-{CAST}					{yylval.crepr = strdup(yytext); return CAST;}
 {BOOL}					{
 
 							if (strdup(yytext)[0] == 't'){
@@ -153,16 +151,16 @@ downto					return KW_DOWNTO;
 
 - 						return '-';
 "/"						return '/';
-=						return (int)("==");
+=						return EQUAL;
 "<"						return '<';
 ">"						return '>';
-"<="					{yylval.crepr = atoi(yytext); return (int)"<=";}
-"<>"					{yylval.crepr = atoi("!=");return "!=";}
-">="					{yylval.crepr = atoi(yytext);return (int)">=";}
+"<="					return L_E_T;
+"<>"					return NOT_EQUAL;
+">="					return G_E_T;
 &&						return KW_AND;
 "||"					return KW_OR;
 "!"						return KW_NOT;
-":="					return '=';
+":="					return ASSIGN;
 
 ","						return ',';
 "["						return '[';
@@ -170,7 +168,9 @@ downto					return KW_DOWNTO;
 ":"						return ':';
 
 
-"+"						return '+';
+"+"						{ printf("token PLUS_OP : %s\n",yytext);
+						  return '+';
+						}
 "*"						return '*';
 ";"						return ';';
 "."						return '.';
