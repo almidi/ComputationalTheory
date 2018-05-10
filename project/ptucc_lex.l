@@ -131,7 +131,7 @@ downto					return KW_DOWNTO;
 &&						return SY_AND;
 "||"					return SY_OR;
 "!"						return SY_NOT;
-":="					return SY_COLON_EQUALS;
+":="					return SY_ASSIGN;
 
 ","						return SY_COMMA;
 "["						return SY_LEFT_SQR_BRACKET;

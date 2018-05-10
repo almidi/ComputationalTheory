@@ -35,13 +35,13 @@ extern int line_num;
 %token KW_GOTO
 %token KW_NOT
 %token KW_RERURN
-%token KW_BOOLEAN
+%token <crepr> KW_BOOLEAN
 %token KW_ELSE
 %token KW_IF
 %token KW_OF
-%token KW_REAL
+%token <crepr> KW_REAL
 %token KW_THEN
-%token KW_CHAR
+%token <crepr> KW_CHAR
 %token KW_FOR
 %token KW_INTEGER
 %token KW_OR
@@ -64,7 +64,7 @@ extern int line_num;
 %token SY_AND
 %token SY_OR
 %token SY_NOT
-%token SY_COLON_EQUALS
+%token SY_ASSIGN
 %token SY_COMMA
 %token SY_LEFT_SQR_BRACKET
 %token SY_RIGHT_SQR_BRACKET
@@ -77,21 +77,18 @@ extern int line_num;
 %token SY_RIGHT_BRACKET
 
 
-%token ASSIGN
-%left EQUAL
-%left NOT_EQUAL
-%left L_E_T
-%left G_E_T
-
 %start program
 
-%type <crepr> program_decl body statements statement_list
-%type <crepr> statement proc_call arguments
+%type <crepr> program_decl  var_decl  body statements statement_list
+%type <crepr> statement proc_call arguments 
 %type <crepr> arglist expression
+%type <crepr> simple_data_type 
+%type <crepr> advanced_data_type  matrix_n shortcut_data_type
 
 %%
 
-program:  program_decl body  '.'   		
+/**********************************PROGRAM***********************************************/
+program:  program_decl var_decl  body  SY_PERIOD    		
 { 
 	/* We have a successful parse! 
 		Check for any errors and generate output. 
@@ -99,35 +96,68 @@ program:  program_decl body  '.'
 	if(yyerror_count==0) {
 		puts(c_prologue);
 		printf("/* program  %s */ \n\n", $1);
-		printf("int main() %s \n", $2);
+		printf("%s\n",$2);
+		printf("int main() %s \n", $3);
+	}
+	else{
+		printf("error");
 	}
 };
 
 
-program_decl : KW_PROGRAM IDENT ';'  	{ $$ = $2; };
+program_decl : KW_PROGRAM IDENT SY_SEMICOLON  	{ $$ = $2; };
 
 body : KW_BEGIN statements KW_END   	{ $$ = template("{\n %s \n }\n", $2); };
 
-statements: 				        	{ $$ = ""; };
+statements: %empty				        	{ $$ = ""; };
 statements: statement_list		   		{ $$ = $1; };
 
 statement_list: statement                     
-			  | statement_list ';' statement  { $$ = template("%s%s", $1, $3); }; 
+			  | statement_list SY_SEMICOLON statement  { $$ = template("%s%s", $1, $3); }; 
 
 
 statement: proc_call  						{ $$ = template("%s;\n", $1); };
 
-proc_call: IDENT '(' arguments ')' 			{ $$ = template("%s(%s)", $1, $3); };
+proc_call: IDENT SY_LEFT_BRACKET arguments SY_RIGHT_BRACKET		{ $$ = template("%s(%s)", $1, $3); };
 
-arguments :									{ $$ = ""; }
+arguments :	%empty								{ $$ = ""; }
 	 	  | arglist 						{ $$ = $1; };
 
 arglist: expression							{ $$ = $1; }
-       | arglist ',' expression 			{ $$ = template("%s,%s", $1, $3);  };
+       | arglist SY_COMMA expression 		{ $$ = template("%s,%s", $1, $3);  };
 
 expression: POSINT 							/* Default action: $$ = $1 */
           | REAL							
           | STRING 							{ $$ = string_ptuc2c($1); };
+
+
+/************************************** Data types ***************************************************/
+
+simple_data_type: KW_INTEGER 					{ $$ = "integer"; }
+				| KW_CHAR						{ $$ = $1; }
+				| KW_BOOLEAN					{ $$ = $1; }
+				| KW_REAL						{ $$ = $1; };
+
+advanced_data_type: simple_data_type   						 { $$ = $1; } 
+				  | KW_ARRAY matrix_n KW_OF simple_data_type { $$ = template("%s,%s",$2, $4); };
+				  
+/* todo*/ /* prepei na mpei akoma to function*/ 
+/* todo*/ /* prepei na mpei akoma to syntomografies*/ 
+/*shortcut_data_type: TYPE IDENT '=' advanced_data_type ';' 	{ $$ = template("%s,%s",$2,$4); }
+				  | IDENT '=' advanced_data_type ';' 		{ $$ = template("%s,%s",$1,$3); }
+;
+*/
+matrix_n : %empty 														{ $$ = "" ;}
+		 | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET 	{ $$ = $3 ;};
+
+
+
+
+/************************************** Variables ***************************************************/
+
+
+var_decl: %empty					   		 	  {$$ = ""; }
+		| KW_VAR IDENT SY_COLON advanced_data_type SY_SEMICOLON { $$ = template("%s",$2); };
 
 %%
 

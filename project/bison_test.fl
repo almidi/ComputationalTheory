@@ -1,0 +1,13 @@
+(* 
+	Sample program var x : integer;
+*)
+
+program foo;
+
+var x : array  of integer;
+
+begin
+	writeString('Hello world');
+	writeString('\n')
+end.
+

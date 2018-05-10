@@ -92,7 +92,7 @@ extern int yydebug;
     SY_AND = 302,
     SY_OR = 303,
     SY_NOT = 304,
-    SY_COLON_EQUALS = 305,
+    SY_ASSIGN = 305,
     SY_COMMA = 306,
     SY_LEFT_SQR_BRACKET = 307,
     SY_RIGHT_SQR_BRACKET = 308,
@@ -102,12 +102,7 @@ extern int yydebug;
     SY_SEMICOLON = 312,
     SY_PERIOD = 313,
     SY_LEFT_BRACKET = 314,
-    SY_RIGHT_BRACKET = 315,
-    ASSIGN = 316,
-    EQUAL = 317,
-    NOT_EQUAL = 318,
-    L_E_T = 319,
-    G_E_T = 320
+    SY_RIGHT_BRACKET = 315
   };
 #endif
 
@@ -120,7 +115,7 @@ union YYSTYPE
 
 	char* crepr;
 
-#line 124 "ptucc_parser.tab.h" /* yacc.c:1909  */
+#line 119 "ptucc_parser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

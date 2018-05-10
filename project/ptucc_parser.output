@@ -1,0 +1,395 @@
+Terminals unused in grammar
+
+   CAST
+   BOOL
+   KW_AND
+   KW_DIV
+   KW_FUNCTION
+   KW_MOD
+   KW_PROCEDURE
+   KW_RESULT
+   KW_ARRAY
+   KW_DO
+   KW_GOTO
+   KW_NOT
+   KW_RERURN
+   KW_BOOLEAN
+   KW_ELSE
+   KW_IF
+   KW_OF
+   KW_REAL
+   KW_THEN
+   KW_CHAR
+   KW_FOR
+   KW_INTEGER
+   KW_OR
+   KW_REPEAT
+   KW_UNTIL
+   KW_VAR
+   KW_WHILE
+   KW_TO
+   KW_DOWNTO
+   ASSIGN
+   EQUAL
+   NOT_EQUAL
+   L_E_T
+   G_E_T
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: program_decl body '.'
+
+    2 program_decl: KW_PROGRAM IDENT ';'
+
+    3 body: KW_BEGIN statements KW_END
+
+    4 statements: %empty
+    5           | statement_list
+
+    6 statement_list: statement
+    7               | statement_list ';' statement
+
+    8 statement: proc_call
+
+    9 proc_call: IDENT '(' arguments ')'
+
+   10 arguments: %empty
+   11          | arglist
+
+   12 arglist: expression
+   13        | arglist ',' expression
+
+   14 expression: POSINT
+   15           | REAL
+   16           | STRING
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 9
+')' (41) 9
+',' (44) 13
+'.' (46) 1
+';' (59) 2 7
+error (256)
+IDENT (258) 2 9
+POSINT (259) 14
+REAL (260) 15
+STRING (261) 16
+CAST (262)
+BOOL (263)
+KW_PROGRAM (264) 2
+KW_BEGIN (265) 3
+KW_END (266) 3
+KW_AND (267)
+KW_DIV (268)
+KW_FUNCTION (269)
+KW_MOD (270)
+KW_PROCEDURE (271)
+KW_RESULT (272)
+KW_ARRAY (273)
+KW_DO (274)
+KW_GOTO (275)
+KW_NOT (276)
+KW_RERURN (277)
+KW_BOOLEAN (278)
+KW_ELSE (279)
+KW_IF (280)
+KW_OF (281)
+KW_REAL (282)
+KW_THEN (283)
+KW_CHAR (284)
+KW_FOR (285)
+KW_INTEGER (286)
+KW_OR (287)
+KW_REPEAT (288)
+KW_UNTIL (289)
+KW_VAR (290)
+KW_WHILE (291)
+KW_TO (292)
+KW_DOWNTO (293)
+ASSIGN (294)
+EQUAL (295)
+NOT_EQUAL (296)
+L_E_T (297)
+G_E_T (298)
+
+
+Nonterminals, with rules where they appear
+
+$accept (49)
+    on left: 0
+program (50)
+    on left: 1, on right: 0
+program_decl (51)
+    on left: 2, on right: 1
+body (52)
+    on left: 3, on right: 1
+statements (53)
+    on left: 4 5, on right: 3
+statement_list (54)
+    on left: 6 7, on right: 5 7
+statement (55)
+    on left: 8, on right: 6 7
+proc_call (56)
+    on left: 9, on right: 8
+arguments (57)
+    on left: 10 11, on right: 9
+arglist (58)
+    on left: 12 13, on right: 11 13
+expression (59)
+    on left: 14 15 16, on right: 12 13
+
+
+State 0
+
+    0 $accept: . program $end
+    1 program: . program_decl body '.'
+    2 program_decl: . KW_PROGRAM IDENT ';'
+
+    KW_PROGRAM  shift, and go to state 1
+
+    program       go to state 2
+    program_decl  go to state 3
+
+
+State 1
+
+    2 program_decl: KW_PROGRAM . IDENT ';'
+
+    IDENT  shift, and go to state 4
+
+
+State 2
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 5
+
+
+State 3
+
+    1 program: program_decl . body '.'
+    3 body: . KW_BEGIN statements KW_END
+
+    KW_BEGIN  shift, and go to state 6
+
+    body  go to state 7
+
+
+State 4
+
+    2 program_decl: KW_PROGRAM IDENT . ';'
+
+    ';'  shift, and go to state 8
+
+
+State 5
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 6
+
+    3 body: KW_BEGIN . statements KW_END
+    4 statements: . %empty  [KW_END]
+    5           | . statement_list
+    6 statement_list: . statement
+    7               | . statement_list ';' statement
+    8 statement: . proc_call
+    9 proc_call: . IDENT '(' arguments ')'
+
+    IDENT  shift, and go to state 9
+
+    $default  reduce using rule 4 (statements)
+
+    statements      go to state 10
+    statement_list  go to state 11
+    statement       go to state 12
+    proc_call       go to state 13
+
+
+State 7
+
+    1 program: program_decl body . '.'
+
+    '.'  shift, and go to state 14
+
+
+State 8
+
+    2 program_decl: KW_PROGRAM IDENT ';' .
+
+    $default  reduce using rule 2 (program_decl)
+
+
+State 9
+
+    9 proc_call: IDENT . '(' arguments ')'
+
+    '('  shift, and go to state 15
+
+
+State 10
+
+    3 body: KW_BEGIN statements . KW_END
+
+    KW_END  shift, and go to state 16
+
+
+State 11
+
+    5 statements: statement_list .  [KW_END]
+    7 statement_list: statement_list . ';' statement
+
+    ';'  shift, and go to state 17
+
+    $default  reduce using rule 5 (statements)
+
+
+State 12
+
+    6 statement_list: statement .
+
+    $default  reduce using rule 6 (statement_list)
+
+
+State 13
+
+    8 statement: proc_call .
+
+    $default  reduce using rule 8 (statement)
+
+
+State 14
+
+    1 program: program_decl body '.' .
+
+    $default  reduce using rule 1 (program)
+
+
+State 15
+
+    9 proc_call: IDENT '(' . arguments ')'
+   10 arguments: . %empty  [')']
+   11          | . arglist
+   12 arglist: . expression
+   13        | . arglist ',' expression
+   14 expression: . POSINT
+   15           | . REAL
+   16           | . STRING
+
+    POSINT  shift, and go to state 18
+    REAL    shift, and go to state 19
+    STRING  shift, and go to state 20
+
+    $default  reduce using rule 10 (arguments)
+
+    arguments   go to state 21
+    arglist     go to state 22
+    expression  go to state 23
+
+
+State 16
+
+    3 body: KW_BEGIN statements KW_END .
+
+    $default  reduce using rule 3 (body)
+
+
+State 17
+
+    7 statement_list: statement_list ';' . statement
+    8 statement: . proc_call
+    9 proc_call: . IDENT '(' arguments ')'
+
+    IDENT  shift, and go to state 9
+
+    statement  go to state 24
+    proc_call  go to state 13
+
+
+State 18
+
+   14 expression: POSINT .
+
+    $default  reduce using rule 14 (expression)
+
+
+State 19
+
+   15 expression: REAL .
+
+    $default  reduce using rule 15 (expression)
+
+
+State 20
+
+   16 expression: STRING .
+
+    $default  reduce using rule 16 (expression)
+
+
+State 21
+
+    9 proc_call: IDENT '(' arguments . ')'
+
+    ')'  shift, and go to state 25
+
+
+State 22
+
+   11 arguments: arglist .  [')']
+   13 arglist: arglist . ',' expression
+
+    ','  shift, and go to state 26
+
+    $default  reduce using rule 11 (arguments)
+
+
+State 23
+
+   12 arglist: expression .
+
+    $default  reduce using rule 12 (arglist)
+
+
+State 24
+
+    7 statement_list: statement_list ';' statement .
+
+    $default  reduce using rule 7 (statement_list)
+
+
+State 25
+
+    9 proc_call: IDENT '(' arguments ')' .
+
+    $default  reduce using rule 9 (proc_call)
+
+
+State 26
+
+   13 arglist: arglist ',' . expression
+   14 expression: . POSINT
+   15           | . REAL
+   16           | . STRING
+
+    POSINT  shift, and go to state 18
+    REAL    shift, and go to state 19
+    STRING  shift, and go to state 20
+
+    expression  go to state 27
+
+
+State 27
+
+   13 arglist: arglist ',' expression .
+
+    $default  reduce using rule 13 (arglist)
