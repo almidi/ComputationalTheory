@@ -110,17 +110,7 @@ downto					return KW_DOWNTO;
 						   }
 						}
 
-{BOOL}					{
-
-							if (strdup(yytext)[0] == 't'){
-    						yylval.boolConstant = 1;
-    						return BOOL;
-							}
-							if (strdup(yytext)[0] == 'f') {
-    						yylval.boolConstant = 0;
-    						return BOOL;
-							}
-						}
+{BOOL}					{ yylval.crepr = strdup(yytext); return POSINT; }
 
 {NUMBER}				{ yylval.crepr = strdup(yytext); return POSINT; }
 {REAL}					{ yylval.crepr = strdup(yytext); return REAL; }
@@ -155,39 +145,6 @@ downto					return KW_DOWNTO;
 "."						return SY_PERIOD;
 "("						return SY_LEFT_BRACKET;
 ")"						return SY_RIGHT_BRACKET;
-
-<string>\\				{}
-<string>\n				{}
-<string>.				{*s++ = yytext[0];}
-
-
-- 						return '-';
-"/"						return '/';
-=						return EQUAL;
-"<"						return '<';
-">"						return '>';
-"<="					return L_E_T;
-"<>"					return NOT_EQUAL;
-">="					return G_E_T;
-&&						return KW_AND;
-"||"					return KW_OR;
-"!"						return KW_NOT;
-":="					return ASSIGN;
-
-","						return ',';
-"["						return '[';
-"]"						return ']';
-":"						return ':';
-
-
-"+"						{ printf("token PLUS_OP : %s\n",yytext);
-						  return '+';
-						}
-"*"						return '*';
-";"						return ';';
-"."						return '.';
-"("						return '(';
-")"						return ')';
 
 
 "(*"					BEGIN(comment);
@@ -247,3 +204,5 @@ char* get_macro(char* name)
 	}
 	return NULL;
 }
+
+

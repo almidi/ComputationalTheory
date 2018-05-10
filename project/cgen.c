@@ -52,26 +52,12 @@ char* string_ptuc2c(char* P)
 	int Plen = strlen(P);
 	assert(Plen>=2);
 
-	char *S = (char*)malloc((strlen(P)+2)*sizeof(char));
-	int Slen = Plen+2;
-
-	for(int i =0;i<Plen;i++){
-		S[i+1]=P[i];
-	}
-
 	P[0] = '"';
 	P[Plen-1] = '"';
 
-	S[0] = '"';
-	S[Slen-1] = P[Plen-1];
-	S[Slen] = P[Plen];
-
 	yyerror("P: %s\n",P);
-	yyerror("S: %s\n",S);
 
-	P;
-
-	return S;
+	return P;
 }
 
 

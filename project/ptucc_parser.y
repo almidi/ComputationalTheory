@@ -10,7 +10,6 @@ extern int line_num;
 %union
 {
 	char* crepr;
-	int boolConstant;
 }
 
 
