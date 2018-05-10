@@ -83,7 +83,7 @@ extern int line_num;
 %type <crepr> statement proc_call arguments 
 %type <crepr> arglist expression
 %type <crepr> simple_data_type 
-%type <crepr> advanced_data_type  matrix_n shortcut_data_type
+%type <crepr> advanced_data_type  matrix_n shortcut_data_type var_decl_id var_decl_list
 
 %%
 
@@ -133,13 +133,14 @@ expression: POSINT 							/* Default action: $$ = $1 */
 
 /************************************** Data types ***************************************************/
 
-simple_data_type: KW_INTEGER 					{ $$ = "integer"; }
-				| KW_CHAR						{ $$ = $1; }
-				| KW_BOOLEAN					{ $$ = $1; }
-				| KW_REAL						{ $$ = $1; };
+simple_data_type: KW_INTEGER 					{ $$ = "int";    }
+				| KW_CHAR						{ $$ = "char"; 	 }
+				| KW_BOOLEAN					{ $$ = "bool";   }
+				| KW_REAL						{ $$ = "double"; };
 
-advanced_data_type: simple_data_type   						 { $$ = $1; } 
-				  | KW_ARRAY matrix_n KW_OF simple_data_type { $$ = template("%s,%s",$2, $4); };
+/*advanced_data_type redundant for now*/
+advanced_data_type: simple_data_type   						 { $$ = $1; } ;
+				 /* | KW_ARRAY matrix_n KW_OF simple_data_type { $$ = template("%s %s",$4, $2); };
 				  
 /* todo*/ /* prepei na mpei akoma to function*/ 
 /* todo*/ /* prepei na mpei akoma to syntomografies*/ 
@@ -148,16 +149,24 @@ advanced_data_type: simple_data_type   						 { $$ = $1; }
 ;
 */
 matrix_n : %empty 														{ $$ = "" ;}
-		 | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET 	{ $$ = $3 ;};
+		 | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET 	{ $$ = template("%s[%s]",$1,$3) ;};
 
 
 
 
 /************************************** Variables ***************************************************/
 
+var_decl: %empty						{ $$ = ""; }
+		| KW_VAR var_decl_list var_decl { $$ = template("%s%s",$3,$2); };
 
-var_decl: %empty					   		 	  {$$ = ""; }
-		| KW_VAR IDENT SY_COLON advanced_data_type SY_SEMICOLON { $$ = template("%s",$2); };
+var_decl_id: IDENT						{ $$ = $1; }
+		   | var_decl_id SY_COMMA IDENT { $$ = template("%s,%s",$1,$3);};
+
+var_decl_list: %empty 							  	  											   				 { $$ = ""; }
+			 | var_decl_id SY_COLON advanced_data_type SY_SEMICOLON var_decl var_decl_list		   				 { $$ = template("%s%s%s %s;\n",$5,$6,$3,$1); };
+			 | var_decl_id SY_COLON KW_ARRAY matrix_n KW_OF simple_data_type SY_SEMICOLON var_decl var_decl_list { $$ = template("%s%s%s %s%s;\n",$8,$9,$6,$1,$4);};
+
+
 
 %%
 
