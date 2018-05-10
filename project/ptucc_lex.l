@@ -28,14 +28,13 @@ DIGIT  		[0-9]
 NUMBER  	{DIGIT}{DIGIT}*
 DECIMAL 	("."{NUMBER})|({NUMBER}("."{NUMBER}?)?)
 REAL    	{DECIMAL}([eE][+-]?{NUMBER})?
-STRING  	[\'\"]
+STRING  	(\')(\\[ntr\\\'\"]|[^\'])*(\')|(\")(\\[ntr\\\'\"]|[^(\")])*(\")
 RELOP		["&&"|"||"|"!"]
 
 
 
 %x comment
 %x macro
-%x string
 %x line_comment
 
 %%
@@ -125,25 +124,38 @@ downto					return KW_DOWNTO;
 
 {NUMBER}				{ yylval.crepr = strdup(yytext); return POSINT; }
 {REAL}					{ yylval.crepr = strdup(yytext); return REAL; }
-
 {STRING}				{ 
-						  BEGIN(string);
-						  s = buf;
+						  yylval.crepr = strdup(yytext);
+						  return STRING;
 						}
-<string>\\n 			{ *s++ = '\n';}
-<string>\\t				{ *s++ = '\t';}
-<string>\\r 			{ *s++ = '\r';}
-<string>\\\\			{ *s++ = '\\';}
-<string>\\\'			{ *s++ = '\'';}
-<string>\\\"			{ *s++ = '\"';}
-<string>{STRING}		{
-							*s = '\0';
-							yylval.crepr = strdup(buf);
-							yyerror("<string>. '%s'\n", yylval.crepr);
-							yytext = strdup(buf);
-							BEGIN(INITIAL);
-							return STRING;
-						}
+
+
+- 						return SY_DASH;
+"/"						return SY_SLASH;
+=						return SY_EQUALS;
+"<"						return SY_LESS;
+">"						return SY_GREATER;
+"<="					return SY_LESS_EQUALS;
+"<>"					return SY_GREATER_EQUALS;
+">="					return SY_LESS_BIGGER;
+&&						return SY_AND;
+"||"					return SY_OR;
+"!"						return SY_NOT;
+":="					return SY_COLON_EQUALS;
+
+","						return SY_COMMA;
+"["						return SY_LEFT_SQR_BRACKET;
+"]"						return SY_RIGHT_SQR_BRACKET;
+":"						return SY_COLON;
+
+
+"+"						return SY_PLUS;
+"*"						return SY_STAR;
+";"						return SY_SEMICOLON;
+"."						return SY_PERIOD;
+"("						return SY_LEFT_BRACKET;
+")"						return SY_RIGHT_BRACKET;
+
 <string>\\				{}
 <string>\n				{}
 <string>.				{*s++ = yytext[0];}
@@ -177,6 +189,7 @@ downto					return KW_DOWNTO;
 "("						return '(';
 ")"						return ')';
 
+
 "(*"					BEGIN(comment);
 <comment>[^*\n]*        /* eat anything that's not a '*' */
 <comment>"*"+[^*)\n]*   /* eat up '*'s not followed by ')'s */
@@ -191,7 +204,7 @@ downto					return KW_DOWNTO;
 
 [ \r\t]					/* skip whitespace */
 \n 						++line_num;
-<<EOF>> 				return EOF;
+<<EOF>>					return EOF;
 
 .        { yyerror("lexical error: unrecognized literal '%s'\n", yytext); }
 
@@ -234,5 +247,3 @@ char* get_macro(char* name)
 	}
 	return NULL;
 }
-
-

@@ -53,11 +53,37 @@ extern int line_num;
 %token KW_TO
 %token KW_DOWNTO
 
+<<<<<<< HEAD
+%token SY_DASH
+%token SY_SLASH
+%token SY_EQUALS
+%token SY_LESS
+%token SY_GREATER
+%token SY_LESS_EQUALS
+%token SY_GREATER_EQUALS
+%token SY_LESS_BIGGER
+%token SY_AND
+%token SY_OR
+%token SY_NOT
+%token SY_COLON_EQUALS
+%token SY_COMMA
+%token SY_LEFT_SQR_BRACKET
+%token SY_RIGHT_SQR_BRACKET
+%token SY_COLON
+%token SY_PLUS
+%token SY_STAR
+%token SY_SEMICOLON
+%token SY_PERIOD
+%token SY_LEFT_BRACKET
+%token SY_RIGHT_BRACKET
+
+=======
 %token ASSIGN
 %left EQUAL
 %left NOT_EQUAL
 %left L_E_T
 %left G_E_T
+>>>>>>> 18f56625f5f2aaff0837cd4d117b0e3d9aee846c
 
 %start program
 
