@@ -53,7 +53,7 @@ extern int line_num;
 %token KW_TO
 %token KW_DOWNTO
 
-<<<<<<< HEAD
+
 %token SY_DASH
 %token SY_SLASH
 %token SY_EQUALS
@@ -77,13 +77,12 @@ extern int line_num;
 %token SY_LEFT_BRACKET
 %token SY_RIGHT_BRACKET
 
-=======
+
 %token ASSIGN
 %left EQUAL
 %left NOT_EQUAL
 %left L_E_T
 %left G_E_T
->>>>>>> 18f56625f5f2aaff0837cd4d117b0e3d9aee846c
 
 %start program
 
