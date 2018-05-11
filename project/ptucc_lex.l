@@ -110,7 +110,6 @@ downto					return KW_DOWNTO;
 						   }
 						}
 
-{BOOL}					{ yylval.crepr = strdup(yytext); return POSINT; }
 
 {NUMBER}				{ yylval.crepr = strdup(yytext); return POSINT; }
 {REAL}					{ yylval.crepr = strdup(yytext); return REAL; }

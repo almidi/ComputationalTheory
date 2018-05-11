@@ -4,11 +4,16 @@ var x : array  of char;
 var x : array  of char;
 *)
 
-program foo;
+program foo; 
+var x,y : char;
+var x:integer;
+	x : array[1] of char;
+	x: array of boolean;
+(*
 var x : array  of char;
-	y,z : integer;
+		y,z : integer;
 var x : array[1] of char;
-
+*)
 begin
 	writeString('Hello world');
 	writeString('\n')
