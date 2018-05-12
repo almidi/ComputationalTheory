@@ -237,7 +237,7 @@ return_type: %empty  {$$="";}
 
 /* need commands first*/
 
-procedure_body: var_decl 
+procedure_body: var_decl subprogram
 
 
 
