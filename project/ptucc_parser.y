@@ -221,7 +221,7 @@ subprogram: %empty { $$ = "";}
 		  | procedure_header { $$ =$1;}
 		  | function_header  { $$ =$1;};
 
-procedure_header: KW_PROCEDURE IDENT SY_LEFT_BRACKET args SY_RIGHT_BRACKET SY_SEMICOLON  subprogram { $$ = template("procedure %s (%s);\n%s",$2,$4,$7);};
+procedure_header: KW_PROCEDURE IDENT SY_LEFT_BRACKET args SY_RIGHT_BRACKET SY_SEMICOLON procedure_body subprogram { $$ = template("procedure %s (%s);\n%s\n%s",$2,$4,$7,$8);};
 
 function_header: KW_FUNCTION IDENT SY_LEFT_BRACKET args SY_RIGHT_BRACKET return_type SY_SEMICOLON subprogram{ $$ = template("function %s (%s)%s;\n%s",$2,$4,$6,$8);};
 
@@ -234,6 +234,33 @@ args_list: 	IDENT SY_COLON advanced_data_type  { $$ = template("%s %s", $3,$1);}
 return_type: %empty  {$$="";}
 		   | advanced_data_type {$$=$1;};
 
+/* need commands first*/
+procedure_body: 
+
+
+
+/********************************************* Commands *********************************************/
+
+complex_cmd: %empty { $$ = "";}
+		   | KW_BEGIN simple_cmd KW_END { $$ = $2;};
+
+
+simple_cmd: SY_SEMICOLON { $$ = ";";}
+		  | IDENT SY_ASSIGN expression      { $$ =template("%s=%s",$1,$3);}	//assign_cmd
+		  | KW_RESULT SY_ASSIGN expression  { $$ =template("%s=%s",$1,$3);}
+		  | if_cmd	
+		  | for_cmd
+
+
+for_cmd: KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO simple_cmd { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}") }
+
+
+if_cmd: KW_IF expression KW_THEN simple_cmd else_state { $$ =template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
+
+
+
+else_state: %empty { $$ = "";}
+		  | KW_ELSE simple_cmd{ $$ = "else{\n\t%s}",$2;};
 
 %%
 /*
