@@ -19,7 +19,7 @@ extern int line_num;
 %token <crepr> REAL 
 %token <crepr> STRING
 %token <crepr> CAST
-%token <boolConstant> BOOL
+%token <crepr> BOOL
 
 %token KW_PROGRAM 
 %token KW_BEGIN 
@@ -250,17 +250,19 @@ simple_cmd: SY_SEMICOLON { $$ = ";";}
 		  | KW_RESULT SY_ASSIGN expression  { $$ =template("%s=%s",$1,$3);}
 		  | if_cmd	
 		  | for_cmd
+		  | while_cmd
 
+while_cmd: KW_WHILE expression KW_DO complex_cmd {$$ =template("while() ")}
 
-for_cmd: KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO simple_cmd { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}") }
+for_cmd: KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO complex_cmd 	 { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}",$2,$4,$2,$6,$2); }
+	   | KW_FOR IDENT SY_ASSIGN expression KW_DOWNTO expression KW_DO complex_cmd{ $$ =template("for(%s=%s; %s=%s; %s--){\n\t%s\n}",$2,$4,$2,$6,$2); };
 
-
-if_cmd: KW_IF expression KW_THEN simple_cmd else_state { $$ =template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
+if_cmd: KW_IF expression KW_THEN complex_cmd else_state { $$ =template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
 
 
 
 else_state: %empty { $$ = "";}
-		  | KW_ELSE simple_cmd{ $$ = "else{\n\t%s}",$2;};
+		  | KW_ELSE complex_cmd{ $$ = "else{\n\t%s}",$2;};
 
 %%
 /*
