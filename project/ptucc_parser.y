@@ -83,13 +83,21 @@ extern int line_num;
 %type <crepr> statement proc_call arguments 
 %type <crepr> arglist expression binary_exp unary_exp
 %type <crepr> simple_data_type 
+
+/*
+<<<<<<< Updated upstream
 %type <crepr> advanced_data_type  matrix_n var_decl_id var_decl_list /*shortcut_data_type*/
+
+%type <crepr> advanced_data_type  matrix_n  var_decl1 var_decl2 var_decl3 subprogram procedure_header args args_list return_type function_header
+
+
 
 %%
 
 /**********************************PROGRAM***********************************************/
-/*SY_PERIOD to end the program*/
-program:  program_decl var_decl  body  SY_PERIOD    		
+
+program:  program_decl var_decl subprogram body  SY_PERIOD    		
+
 { 
 	/* We have a successful parse! 
 		Check for any errors and generate output. 
@@ -98,7 +106,8 @@ program:  program_decl var_decl  body  SY_PERIOD
 		puts(c_prologue);
 		printf("/* program  %s */ \n\n", $1);
 		printf("%s\n",$2);
-		printf("int main() %s \n", $3);
+		printf("%s\n",$3);
+		printf("int main() %s \n", $4);
 	}
 	else{
 		printf("error");
@@ -109,6 +118,7 @@ program:  program_decl var_decl  body  SY_PERIOD
 program_decl : KW_PROGRAM IDENT SY_SEMICOLON  	{ $$ = $2; }; /*Return Identifier*/
 
 body : KW_BEGIN statements KW_END   	{ $$ = template("{\n %s \n }\n", $2); };/*Return Statements in brackets*/
+
 
 statements: %empty				        	{ $$ = ""; }
 		  | statement_list		   			{ $$ = $1; };
@@ -154,7 +164,7 @@ binary_exp : expression SY_DASH				expression { $$ = template("%s-%s" , $1, $3);
 expression: POSINT
           | REAL							
           | STRING 							{ $$ = string_ptuc2c($1); };
-          |	BOOL 							
+//          |	BOOL 							
           |	IDENT
           | SY_LEFT_BRACKET expression SY_RIGHT_BRACKET {$$ = $2;}; /* needs fixing for precedence */
           | unary_exp ;
@@ -169,8 +179,10 @@ simple_data_type: KW_INTEGER 					{ $$ = "int";    }
 				| KW_REAL						{ $$ = "double"; };
 
 /*advanced_data_type redundant for now*/
-advanced_data_type: simple_data_type   						 { $$ = $1; } ;
-				 /* | KW_ARRAY matrix_n KW_OF simple_data_type { $$ = template("%s %s",$4, $2); };
+advanced_data_type: simple_data_type   						 { $$ = $1; } 
+				  | KW_ARRAY KW_OF simple_data_type 		 { $$ = template("%s*",$3);}
+				  | KW_ARRAY matrix_n KW_OF simple_data_type { $$ = template("%s %s",$4, $2); }
+				  ;
 				  
 /* todo*/ /* prepei na mpei akoma to function*/ 
 /* todo*/ /* prepei na mpei akoma to syntomografies*/ 
@@ -182,9 +194,13 @@ matrix_n : SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET				{ $$ = template("[
 		 | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET 	{ $$ = template("%s[%s]",$1,$3) ;};
 
 
-/************************************** Variables ***************************************************/
 
-var_decl: %empty { $$ = ""; }
+
+
+/********************************************* Variables *********************************************/
+
+
+var_decl: %empty { $$ = ""; } 
 		| KW_VAR var_decl1  var_decl2 var_decl3 var_decl { $$ = template("%s %s%s;\n%s",$4,$2 ,$3,$5);}
 		| var_decl1  var_decl2 var_decl3 var_decl { $$ = template("%s %s%s;\n%s",$3,$1 ,$2,$4);};
 
@@ -196,8 +212,27 @@ var_decl2: SY_COLON  {$$ = "";}
 		 | SY_COLON KW_ARRAY KW_OF  {$$ = template("*");};
 
 
-var_decl3: advanced_data_type SY_SEMICOLON  { $$ = $1; };
+var_decl3: simple_data_type SY_SEMICOLON  { $$ = $1; };
 
+
+/********************************************* Procedures *********************************************/
+
+subprogram: %empty { $$ = "";}
+		  | procedure_header { $$ =$1;}
+		  | function_header  { $$ =$1;};
+
+procedure_header: KW_PROCEDURE IDENT SY_LEFT_BRACKET args SY_RIGHT_BRACKET SY_SEMICOLON  subprogram { $$ = template("procedure %s (%s);\n%s",$2,$4,$7);};
+
+function_header: KW_FUNCTION IDENT SY_LEFT_BRACKET args SY_RIGHT_BRACKET return_type SY_SEMICOLON subprogram{ $$ = template("function %s (%s)%s;\n%s",$2,$4,$6,$8);};
+
+args: %empty 		{ $$ = "";}
+	| args_list     { $$ = $1;};
+
+args_list: 	IDENT SY_COLON advanced_data_type  { $$ = template("%s %s", $3,$1);}
+		 |  args_list SY_COMMA IDENT SY_COLON advanced_data_type  { $$ = template("%s,%s %s",$1, $5,$3);};
+
+return_type: %empty  {$$="";}
+		   | advanced_data_type {$$=$1;};
 
 
 %%
