@@ -1,0 +1,21 @@
+(* 
+	Sample program 
+var x : array  of char;
+var x : array  of char;
+*)
+
+program foo; 
+var x,y : char;
+var x:integer;
+	x : array[1] of char;
+	x: array of boolean;
+
+procedure a (x: integer, y : char, z: array of real,a: boolean);
+procedure b();
+function c();
+
+begin
+	writeString('Hello world');
+	writeString('\n')
+end.
+
