@@ -53,41 +53,42 @@ extern int line_num;
 %token KW_DOWNTO
 
 
-%token SY_DASH
-%token SY_SLASH
-%token SY_EQUALS
-%token SY_LESS
-%token SY_GREATER
-%token SY_LESS_EQUALS
-%token SY_GREATER_EQUALS
-%token SY_LESS_BIGGER
-%token SY_AND
-%token SY_OR
-%token SY_NOT
-%token SY_ASSIGN
-%token SY_COMMA
-%token SY_LEFT_SQR_BRACKET
-%token SY_RIGHT_SQR_BRACKET
-%token SY_COLON
-%token SY_PLUS
-%token SY_STAR
-%token SY_SEMICOLON
-%token SY_PERIOD
-%token SY_LEFT_BRACKET
-%token SY_RIGHT_BRACKET
+%token SY_DASH					/* -  */
+%token SY_PLUS					/* +  */
+%token SY_STAR					/* *  */
+%token SY_SLASH					/* /  */
+%token SY_EQUALS				/* =  */
+%token SY_LESS					/* <  */
+%token SY_GREATER				/* >  */
+%token SY_LESS_EQUALS			/* <= */
+%token SY_GREATER_EQUALS		/* <> */
+%token SY_LESS_BIGGER			/* >= */
+%token SY_AND					/* && */
+%token SY_OR					/* || */
+%token SY_ASSIGN				/* := */
+%token SY_NOT					/* !  */
+%token SY_COMMA					/* ,  */
+%token SY_LEFT_SQR_BRACKET		/* [  */
+%token SY_RIGHT_SQR_BRACKET		/* ]  */
+%token SY_COLON					/* :  */
+%token SY_SEMICOLON				/* ;  */
+%token SY_PERIOD				/* .  */
+%token SY_LEFT_BRACKET			/* (  */
+%token SY_RIGHT_BRACKET			/* )  */
 
 
 %start program
 
 %type <crepr> program_decl  var_decl  body statements statement_list
 %type <crepr> statement proc_call arguments 
-%type <crepr> arglist expression
+%type <crepr> arglist expression binary_exp unary_exp
 %type <crepr> simple_data_type 
-%type <crepr> advanced_data_type  matrix_n shortcut_data_type var_decl_id var_decl_list
+%type <crepr> advanced_data_type  matrix_n var_decl_id var_decl_list /*shortcut_data_type*/
 
 %%
 
 /**********************************PROGRAM***********************************************/
+/*SY_PERIOD to end the program*/
 program:  program_decl var_decl  body  SY_PERIOD    		
 { 
 	/* We have a successful parse! 
@@ -105,30 +106,59 @@ program:  program_decl var_decl  body  SY_PERIOD
 };
 
 
-program_decl : KW_PROGRAM IDENT SY_SEMICOLON  	{ $$ = $2; };
+program_decl : KW_PROGRAM IDENT SY_SEMICOLON  	{ $$ = $2; }; /*Return Identifier*/
 
-body : KW_BEGIN statements KW_END   	{ $$ = template("{\n %s \n }\n", $2); };
+body : KW_BEGIN statements KW_END   	{ $$ = template("{\n %s \n }\n", $2); };/*Return Statements in brackets*/
 
-statements: %empty				        	{ $$ = ""; };
+statements: %empty				        { $$ = ""; };
 statements: statement_list		   		{ $$ = $1; };
 
 statement_list: statement                     
-			  | statement_list SY_SEMICOLON statement  { $$ = template("%s%s", $1, $3); }; 
+			  | statement_list SY_SEMICOLON statement  { $$ = template("%s%s", $1, $3); }; /*TODO Make sure this is correct ??*/
 
 
 statement: proc_call  						{ $$ = template("%s;\n", $1); };
 
-proc_call: IDENT SY_LEFT_BRACKET arguments SY_RIGHT_BRACKET		{ $$ = template("%s(%s)", $1, $3); };
 
-arguments :	%empty								{ $$ = ""; }
-	 	  | arglist 						{ $$ = $1; };
+/*Processes and functions*/
+proc_call: IDENT SY_LEFT_BRACKET arguments SY_RIGHT_BRACKET		{ $$ = template("%s(%s)", $1, $3); }; /* identifier (arguments)*/
 
-arglist: expression							{ $$ = $1; }
-       | arglist SY_COMMA expression 		{ $$ = template("%s,%s", $1, $3);  };
+arguments :	%empty							{ $$ = ""; }  /* init empty argumetns */
+	 	  | arglist 						{ $$ = $1; }; /* list arguments */ 
 
-expression: POSINT 							/* Default action: $$ = $1 */
+arglist: expression							{ $$ = $1; }  /* an expression */
+       | arglist SY_COMMA expression 		{ $$ = template("%s,%s", $1, $3);  }; /*recursive for more expressions */
+
+
+/************************************** Expressions ***************************************************/
+
+unary_exp : SY_DASH 	expression  	{ $$ = template("+%s", $2);};
+		  |	SY_NOT 		expression 		{ $$ = template("-%s", $2);};
+		  |	expression 	SY_NOT 			{ $$ = template("%s!", $1);};
+
+binary_exp : expression SY_DASH				expression { $$ = template("%s-%s" , $1, $3);};
+		   | expression SY_PLUS				expression { $$ = template("%s+%s" , $1, $3);};
+		   | expression SY_STAR				expression { $$ = template("%s*%s" , $1, $3);};
+		   | expression SY_SLASH			expression { $$ = template("%s/%s" , $1, $3);};
+		   | expression SY_EQUALS			expression { $$ = template("%s=%s" , $1, $3);};
+		   | expression SY_LESS				expression { $$ = template("%s<%s" , $1, $3);};
+		   | expression SY_GREATER			expression { $$ = template("%s>%s" , $1, $3);};
+		   | expression SY_LESS_EQUALS		expression { $$ = template("%s<=%s", $1, $3);};
+		   | expression SY_GREATER_EQUALS	expression { $$ = template("%s<>%s", $1, $3);};
+		   | expression SY_LESS_BIGGER		expression { $$ = template("%s>=%s", $1, $3);};
+		   | expression SY_AND				expression { $$ = template("%s&&%s", $1, $3);};
+		   | expression SY_OR				expression { $$ = template("%s||%s", $1, $3);};
+		   | expression SY_ASSIGN			expression { $$ = template("%s:=%s", $1, $3);};
+
+
+expression: POSINT
           | REAL							
           | STRING 							{ $$ = string_ptuc2c($1); };
+          |	BOOL 							
+          |	IDENT
+          | SY_LEFT_BRACKET expression SY_RIGHT_BRACKET {$$ = $2;}; /* needs fixing for precedence */
+          | unary_exp ;
+          | binary_exp ;
 
 
 /************************************** Data types ***************************************************/
@@ -150,8 +180,6 @@ advanced_data_type: simple_data_type   						 { $$ = $1; } ;
 */
 matrix_n : %empty 														{ $$ = "" ;}
 		 | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET 	{ $$ = template("%s[%s]",$1,$3) ;};
-
-
 
 
 /************************************** Variables ***************************************************/

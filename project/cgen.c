@@ -55,7 +55,7 @@ char* string_ptuc2c(char* P)
 	P[0] = '"';
 	P[Plen-1] = '"';
 
-	yyerror("P: %s\n",P);
+	yyerror("String ptuc2c P: %s\n",P);
 
 	return P;
 }
