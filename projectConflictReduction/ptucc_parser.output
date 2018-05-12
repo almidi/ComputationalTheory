@@ -10,7 +10,7 @@ Terminals unused in grammar
    KW_DO
    KW_GOTO
    KW_NOT
-   KW_RERURN
+   KW_RETURN
    KW_ELSE
    KW_IF
    KW_THEN
@@ -126,7 +126,7 @@ KW_ARRAY (273) 22 31 32
 KW_DO (274)
 KW_GOTO (275)
 KW_NOT (276)
-KW_RERURN (277)
+KW_RETURN (277)
 KW_BOOLEAN (278) 19
 KW_ELSE (279)
 KW_IF (280)

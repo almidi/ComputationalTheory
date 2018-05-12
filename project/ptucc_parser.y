@@ -19,7 +19,7 @@ extern int line_num;
 %token <crepr> REAL 
 %token <crepr> STRING
 %token <crepr> CAST
-%token <boolConstant> BOOL
+%token <crepr> BOOL
 
 %token KW_PROGRAM 
 %token KW_BEGIN 
@@ -34,14 +34,14 @@ extern int line_num;
 %token KW_DO
 %token KW_GOTO
 %token KW_NOT
-%token KW_RERURN
-%token <crepr> KW_BOOLEAN
+%token KW_RETURN
+%token KW_BOOLEAN
 %token KW_ELSE
 %token KW_IF
 %token KW_OF
-%token <crepr> KW_REAL
+%token KW_REAL
 %token KW_THEN
-%token <crepr> KW_CHAR
+%token KW_CHAR
 %token KW_FOR
 %token KW_INTEGER
 %token KW_OR
@@ -53,28 +53,28 @@ extern int line_num;
 %token KW_DOWNTO
 
 
-%token SY_DASH					/* -  */
-%token SY_PLUS					/* +  */
-%token SY_STAR					/* *  */
-%token SY_SLASH					/* /  */
-%token SY_EQUALS				/* =  */
-%token SY_LESS					/* <  */
-%token SY_GREATER				/* >  */
-%token SY_LESS_EQUALS			/* <= */
-%token SY_GREATER_EQUALS		/* <> */
-%token SY_LESS_BIGGER			/* >= */
-%token SY_AND					/* && */
-%token SY_OR					/* || */
-%token SY_ASSIGN				/* := */
-%token SY_NOT					/* !  */
-%token SY_COMMA					/* ,  */
-%token SY_LEFT_SQR_BRACKET		/* [  */
-%token SY_RIGHT_SQR_BRACKET		/* ]  */
-%token SY_COLON					/* :  */
-%token SY_SEMICOLON				/* ;  */
-%token SY_PERIOD				/* .  */
-%token SY_LEFT_BRACKET			/* (  */
-%token SY_RIGHT_BRACKET			/* )  */
+%left SY_DASH					/* -  */
+%left SY_PLUS					/* +  */
+%left SY_STAR					/* *  */
+%left SY_SLASH					/* /  */
+%left SY_EQUALS					/* =  */
+%left SY_LESS					/* <  */
+%left SY_GREATER				/* >  */
+%left SY_LESS_EQUALS			/* <= */
+%left SY_GREATER_EQUALS			/* <> */
+%left SY_LESS_BIGGER			/* >= */
+%left SY_AND					/* && */
+%left SY_OR						/* || */
+%left SY_ASSIGN					/* := */
+%left SY_NOT					/* !  */
+%left SY_COMMA					/* ,  */
+%left SY_LEFT_SQR_BRACKET		/* [  */
+%left SY_RIGHT_SQR_BRACKET		/* ]  */
+%left SY_COLON					/* :  */
+%left SY_SEMICOLON				/* ;  */
+%left SY_PERIOD					/* .  */
+%left SY_LEFT_BRACKET			/* (  */
+%left SY_RIGHT_BRACKET			/* )  */
 
 
 %start program
@@ -88,9 +88,10 @@ extern int line_num;
 <<<<<<< Updated upstream
 %type <crepr> advanced_data_type  matrix_n var_decl_id var_decl_list /*shortcut_data_type*/
 
-%type <crepr> advanced_data_type  matrix_n  var_decl1 var_decl2 var_decl3 subprogram procedure_header args args_list return_type function_header
+%type <crepr> advanced_data_type  matrix_n  var_decl1 var_decl2 var_decl3 subprogram procedure_header args_decl args_decl_list return_type function_header
+%type <crepr> complex_cmd simple_cmd while_cmd for_cmd if_cmd else_state
 
-
+ 
 
 %%
 
@@ -221,21 +222,22 @@ subprogram: %empty { $$ = "";}
 		  | procedure_header { $$ =$1;}
 		  | function_header  { $$ =$1;};
 
-procedure_header: KW_PROCEDURE IDENT SY_LEFT_BRACKET args SY_RIGHT_BRACKET SY_SEMICOLON procedure_body subprogram { $$ = template("procedure %s (%s);\n%s\n%s",$2,$4,$7,$8);};
+procedure_header: KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET SY_SEMICOLON procedure_body subprogram { $$ = template("procedure %s (%s);\n%s\n%s",$2,$4,$7,$8);};
 
-function_header: KW_FUNCTION IDENT SY_LEFT_BRACKET args SY_RIGHT_BRACKET return_type SY_SEMICOLON subprogram{ $$ = template("function %s (%s)%s;\n%s",$2,$4,$6,$8);};
+function_header: KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON subprogram{ $$ = template("function %s (%s)%s;\n%s",$2,$4,$6,$8);};
 
-args: %empty 		{ $$ = "";}
-	| args_list     { $$ = $1;};
+args_decl: %empty 		{ $$ = "";}
+ 	 | args_decl_list     { $$ = $1;};
 
-args_list: 	IDENT SY_COLON advanced_data_type  { $$ = template("%s %s", $3,$1);}
-		 |  args_list SY_COMMA IDENT SY_COLON advanced_data_type  { $$ = template("%s,%s %s",$1, $5,$3);};
+args_decl_list: IDENT SY_COLON advanced_data_type  { $$ = template("%s %s", $3,$1);}
+		      |  args_decl_list SY_COMMA IDENT SY_COLON advanced_data_type  { $$ = template("%s,%s %s",$1, $5,$3);};
 
 return_type: %empty  {$$="";}
 		   | advanced_data_type {$$=$1;};
 
 /* need commands first*/
-procedure_body: 
+
+procedure_body: var_decl 
 
 
 
@@ -248,19 +250,26 @@ complex_cmd: %empty { $$ = "";}
 simple_cmd: SY_SEMICOLON { $$ = ";";}
 		  | IDENT SY_ASSIGN expression      { $$ =template("%s=%s",$1,$3);}	//assign_cmd
 		  | KW_RESULT SY_ASSIGN expression  { $$ =template("%s=%s",$1,$3);}
-		  | if_cmd	
-		  | for_cmd
+		  | if_cmd							{ $$ = $1;}
+		  | for_cmd							{ $$ = $1;}
+		  | while_cmd						{ $$ = $1;}
+		  | IDENT SY_COLON complex_cmd		{$$ = template("%s: %s;",$1,$3);}
+		  | KW_GOTO IDENT   				{$$ = template("goto %s;",$2);}
+		  | KW_RETURN						{$$ = template("return;");}
+		  | IDENT SY_LEFT_BRACKET arglist 	{$$ = template("%s(%s);\n",$1,$3);};
 
+while_cmd: KW_WHILE expression KW_DO complex_cmd	 {$$ =template("while(%s){\n\t%s\n}\n",$2,$4);}
+		 | KW_REPEAT complex_cmd KW_UNTIL expression {$$ =template("do{\n\t%s\n}\nwhile(%s)",$2,$4);};
 
-for_cmd: KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO simple_cmd { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}") }
+for_cmd: KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO complex_cmd 	 { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}",$2,$4,$2,$6,$2); }
+	   | KW_FOR IDENT SY_ASSIGN expression KW_DOWNTO expression KW_DO complex_cmd{ $$ =template("for(%s=%s; %s=%s; %s--){\n\t%s\n}",$2,$4,$2,$6,$2); };
 
-
-if_cmd: KW_IF expression KW_THEN simple_cmd else_state { $$ =template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
+if_cmd: KW_IF expression KW_THEN complex_cmd else_state { $$ =template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
 
 
 
 else_state: %empty { $$ = "";}
-		  | KW_ELSE simple_cmd{ $$ = "else{\n\t%s}",$2;};
+		  | KW_ELSE complex_cmd{ $$ = "else{\n\t%s}",$2;};
 
 %%
 /*
