@@ -89,7 +89,7 @@ extern int line_num;
 %type <crepr> advanced_data_type  matrix_n var_decl_id var_decl_list /*shortcut_data_type*/
 
 %type <crepr> advanced_data_type  matrix_n  var_decl1 var_decl2 var_decl3 subprogram procedure_header args_decl args_decl_list return_type function_header
-%type <crepr> complex_cmd simple_cmd while_cmd for_cmd if_cmd else_state
+%type <crepr> complex_cmd simple_cmd while_cmd for_cmd if_cmd else_state procedure_body 
 
  
 
@@ -237,7 +237,7 @@ return_type: %empty  {$$="";}
 
 /* need commands first*/
 
-procedure_body: var_decl subprogram
+procedure_body: var_decl subprogram complex_cmd {$$ = template("%s %s %s",$1,$2,$3);};
 
 
 
@@ -249,14 +249,14 @@ complex_cmd: %empty { $$ = "";}
 
 simple_cmd: SY_SEMICOLON { $$ = ";";}
 		  | IDENT SY_ASSIGN expression      { $$ =template("%s=%s",$1,$3);}	//assign_cmd
-		  | KW_RESULT SY_ASSIGN expression  { $$ =template("%s=%s",$1,$3);}
+		  | KW_RESULT SY_ASSIGN expression  { $$ =template("result=%s",$3);}
 		  | if_cmd							{ $$ = $1;}
 		  | for_cmd							{ $$ = $1;}
 		  | while_cmd						{ $$ = $1;}
-		  | IDENT SY_COLON complex_cmd		{$$ = template("%s: %s;",$1,$3);}
-		  | KW_GOTO IDENT   				{$$ = template("goto %s;",$2);}
-		  | KW_RETURN						{$$ = template("return;");}
-		  | IDENT SY_LEFT_BRACKET arglist 	{$$ = template("%s(%s);\n",$1,$3);};
+		  | IDENT SY_COLON complex_cmd		{ $$ = template("%s: %s;",$1,$3);}
+		  | KW_GOTO IDENT   				{ $$ = template("goto %s;",$2);}
+		  | KW_RETURN						{ $$ = template("return;");}
+		  | IDENT SY_LEFT_BRACKET arglist 	{ $$ = template("%s(%s);\n",$1,$3);};
 
 while_cmd: KW_WHILE expression KW_DO complex_cmd	 {$$ =template("while(%s){\n\t%s\n}\n",$2,$4);}
 		 | KW_REPEAT complex_cmd KW_UNTIL expression {$$ =template("do{\n\t%s\n}\nwhile(%s)",$2,$4);};
@@ -269,7 +269,7 @@ if_cmd: KW_IF expression KW_THEN complex_cmd else_state { $$ =template("if(%s){\
 
 
 else_state: %empty { $$ = "";}
-		  | KW_ELSE complex_cmd{ $$ = "else{\n\t%s}",$2;};
+		  | KW_ELSE complex_cmd{ $$ = template("else{\n\t%s}",$2);};
 
 %%
 /*
