@@ -1002,7 +1002,7 @@ return KW_NOT;
 case 16:
 YY_RULE_SETUP
 #line 80 "ptucc_lex.l"
-return KW_RERURN;
+return KW_RETURN;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP

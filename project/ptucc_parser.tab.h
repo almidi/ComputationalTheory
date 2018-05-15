@@ -64,7 +64,7 @@ extern int yydebug;
     KW_DO = 274,
     KW_GOTO = 275,
     KW_NOT = 276,
-    KW_RERURN = 277,
+    KW_RETURN = 277,
     KW_BOOLEAN = 278,
     KW_ELSE = 279,
     KW_IF = 280,
@@ -111,7 +111,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 11 "ptucc_parser.y" /* yacc.c:1909  */
+#line 10 "ptucc_parser.y" /* yacc.c:1909  */
 
 	char* crepr;
 

@@ -34,7 +34,7 @@ extern int line_num;
 %token KW_DO
 %token KW_GOTO
 %token KW_NOT
-%token KW_RERURN
+%token KW_RETURN
 %token <crepr> KW_BOOLEAN
 %token KW_ELSE
 %token KW_IF

@@ -77,7 +77,7 @@ array					return KW_ARRAY;
 do						return KW_DO;
 goto					return KW_GOTO;
 not 					return KW_NOT;
-return					return KW_RERURN;
+return					return KW_RETURN;
 boolean					return KW_BOOLEAN;
 else					return KW_ELSE;
 if						return KW_IF;
