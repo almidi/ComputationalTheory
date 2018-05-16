@@ -2,6 +2,10 @@
 	Print various literals
 *)
 program test;
+
+type
+    string = array of char;;
+
 begin
 	writeString("Hello world\n");
 	writeString('Hello world ');

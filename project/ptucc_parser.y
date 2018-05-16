@@ -53,8 +53,8 @@ extern int line_num;
 %token KW_TYPE
 
 
-%left SY_DASH					/* -  */
-%left SY_PLUS					/* +  */
+%right SY_DASH					/* -  */
+%right SY_PLUS					/* +  */
 %left SY_STAR					/* *  */
 %left SY_SLASH					/* /  */
 %left SY_EQUALS					/* =  */
@@ -66,12 +66,12 @@ extern int line_num;
 %left SY_AND					/* && */
 %left SY_OR						/* || */
 %left SY_ASSIGN					/* := */
-%left SY_NOT					/* !  */
+%right SY_NOT					/* !  */
 %left SY_COMMA					/* ,  */
 %left SY_LEFT_SQR_BRACKET		/* [  */
 %left SY_RIGHT_SQR_BRACKET		/* ]  */
 %left SY_COLON					/* :  */
-%left SY_SEMICOLON				/* ;  */
+%right SY_SEMICOLON				/* ;  */
 %left SY_PERIOD					/* .  */
 %left SY_LEFT_BRACKET			/* (  */
 %left SY_RIGHT_BRACKET			/* )  */
@@ -87,8 +87,8 @@ extern int line_num;
 <<<<<<< Updated upstream
 %type <crepr> advanced_data_type  matrix_n var_decl_id var_decl_list /*shortcut_data_type*/
 
-%type <crepr> matrix_n  var_decl1 var_decl2 var_decl3 
-%type <crepr> simple_data_type advanced_data_type type_def type_list shortcut_data_type   type_def_decl 
+%type <crepr> matrix_n var_decl_list var_decl1 var_decl2 var_decl3 
+%type <crepr> simple_data_type advanced_data_type type_def type_list shortcut_data_type
 
 %type <crepr> return_type function_header function_body
 %type <crepr> args_decl args_decl_list  procedure_body subprogram procedure_header 
@@ -109,7 +109,8 @@ program:  program_decl type_def var_decl subprogram body  SY_PERIOD
 		printf("/* program  %s */ \n\n", $1);
 		printf("%s\n",$2);
 		printf("%s\n",$3);
-		printf("int main() %s \n", $4);
+		printf("%s\n",$4);
+		printf("int main() %s \n", $5);
 	}
 	else{
 		printf("error");
@@ -176,17 +177,14 @@ expression: POSINT
 /************************************** Data types ***************************************************/
 
 type_def : %empty				        	{ $$ = ""; } /* in case of "type" at least one shorcut must be found*/
-		 | KW_TYPE type_def_decl {$$=$2;};
-
-type_def_decl: type_list SY_SEMICOLON { $$ = template("%s", $1);};
+		 | KW_TYPE type_list 			    { $$=$2; };
 
 
+type_list	: shortcut_data_type  { $$ = template("%s", $1); }; /*TODO Make sure this is correct ??*/
+			| type_list shortcut_data_type;
 
-type_list:  shortcut_data_type  { $$ = template("%s", $1); }; /*TODO Make sure this is correct ??*/
+shortcut_data_type: IDENT SY_EQUALS advanced_data_type SY_SEMICOLON { $$ = template("typedef %s %s;\n",$3,$1);};
 
-shortcut_data_type: %empty              {$$="";}
-		 |IDENT SY_EQUALS advanced_data_type type_def_decl	{ $$ = template("typedef %s %s;\n%s ",$3,$1,$4);};
-				  
 
 advanced_data_type: simple_data_type   						 { $$ = $1; } 
 				  | KW_ARRAY KW_OF simple_data_type 		 { $$ = template("%s*",$3);}
@@ -209,8 +207,10 @@ simple_data_type: KW_INTEGER 					{ $$ = "int";    }
 
 
 var_decl: %empty { $$ = ""; } 
-		| KW_VAR var_decl1  var_decl2 var_decl3 var_decl { $$ = template("%s %s%s;\n%s",$4,$2 ,$3,$5);}
-		| var_decl1  var_decl2 var_decl3 var_decl { $$ = template("%s %s%s;\n%s",$3,$1 ,$2,$4);};
+		| KW_VAR var_decl_list { $$ = $2;};
+
+var_decl_list: var_decl1  var_decl2 var_decl3 { $$ = template("%s %s%s;\n",$3,$1 ,$2);};
+			 | var_decl_list var_decl1  var_decl2 var_decl3 { $$ = template("%s %s %s%s;\n",$1, $4,$2 ,$3);};
 
 var_decl1: IDENT 	{ $$ = template("%s",$1);}
 		 | var_decl1 SY_COMMA IDENT {$$=template("%s,%s",$1,$3);};

@@ -10,7 +10,7 @@ type
     string = array of char;
 
 var x,y : char;
-var x:integer;
+	x:integer;
 	x : array[1] of char;
 	x: array of boolean;
 
