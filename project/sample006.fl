@@ -23,11 +23,12 @@ begin
 end;
 
 function factorial(n:integer) : integer;
+
 var
 	fac, i: integer;
 begin
 	fac := 1; 
-	for i:=n downto 1 do fac:=i*fac;
+	for i:=n downto 1 do fac:=i;
 	result := fac;
 	return
 end;

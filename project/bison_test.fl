@@ -14,9 +14,13 @@ var x,y : char;
 	x : array[1] of char;
 	x: array of boolean;
 
-procedure a (x: integer, y : char, z: array of real,a: boolean);
-procedure b();
-function c();
+
+(*function b();*)
+procedure c();
+
+begin
+	writeString('Hello world')
+end;
 
 begin
 	writeString('Hello world');
