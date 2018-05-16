@@ -80,20 +80,19 @@ extern int line_num;
 %start program
 
 %type <crepr> program_decl  var_decl  body statements statement_list
-%type <crepr> statement proc_call arguments 
-%type <crepr> arglist expression binary_exp unary_exp
-%type <crepr> simple_data_type 
+%type <crepr> statement proc_call arguments  
+%type <crepr>  arglist expression binary_exp unary_exp
 
 /*
 <<<<<<< Updated upstream
 %type <crepr> advanced_data_type  matrix_n var_decl_id var_decl_list /*shortcut_data_type*/
 
-%type <crepr> matrix_n  var_decl1 var_decl2 var_decl3 subprogram procedure_header type_def type_list shortcut_data_type
-%type <crepr> advanced_data_type
+%type <crepr> matrix_n  var_decl1 var_decl2 var_decl3 
+%type <crepr> simple_data_type advanced_data_type type_def type_list shortcut_data_type   type_def_decl 
 
-%type <crepr> return_type function_header
-%type <crepr> args_decl args_decl_list  procedure_body
-%type <crepr> complex_cmd command  simple_cmd while_cmd for_cmd if_cmd else_state 
+%type <crepr> return_type function_header function_body
+%type <crepr> args_decl args_decl_list  procedure_body subprogram procedure_header 
+%type <crepr> complex_cmd command  simple_cmd while_cmd for_cmd if_cmd else_state  
 
 %%
 
@@ -108,9 +107,9 @@ program:  program_decl type_def var_decl subprogram body  SY_PERIOD
 	if(yyerror_count==0) {
 		puts(c_prologue);
 		printf("/* program  %s */ \n\n", $1);
+		printf("%s\n",$2);
 		printf("%s\n",$3);
-		printf("%s\n",$4);
-		printf("int main() %s \n", $5);
+		printf("int main() %s \n", $4);
 	}
 	else{
 		printf("error");
@@ -177,19 +176,22 @@ expression: POSINT
 /************************************** Data types ***************************************************/
 
 type_def : %empty				        	{ $$ = ""; } /* in case of "type" at least one shorcut must be found*/
-		 | KW_TYPE type_list SY_SEMICOLON   { $$ = template("%s;", $2); };
+		 | KW_TYPE type_def_decl {$$=$2;};
 
-type_list: shortcut_data_type                     
-		| type_list SY_SEMICOLON shortcut_data_type  { $$ = template("%s;\n%s", $1, $3); }; /*TODO Make sure this is correct ??*/
+type_def_decl: type_list SY_SEMICOLON { $$ = template("%s", $1);};
 
 
-shortcut_data_type: IDENT SY_EQUALS advanced_data_type 		{ $$ = template("typedef %s %s" ,$3,$1);};
 
+type_list:  shortcut_data_type  { $$ = template("%s", $1); }; /*TODO Make sure this is correct ??*/
+
+shortcut_data_type: %empty              {$$="";}
+		 |IDENT SY_EQUALS advanced_data_type type_def_decl	{ $$ = template("typedef %s %s;\n%s ",$3,$1,$4);};
+				  
 
 advanced_data_type: simple_data_type   						 { $$ = $1; } 
 				  | KW_ARRAY KW_OF simple_data_type 		 { $$ = template("%s*",$3);}
 				  | KW_ARRAY matrix_n KW_OF simple_data_type { $$ = template("%s %s",$4, $2); };
-
+				  | KW_FUNCTION SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET SY_COLON return_type { $$ = template("%s(*)(%s)",$6,$3);};
 
 matrix_n : SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET				{ $$ = template("[%s]",$2) ;}
 		 | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET 	{ $$ = template("%s[%s]",$1,$3) ;};
@@ -201,8 +203,6 @@ simple_data_type: KW_INTEGER 					{ $$ = "int";    }
 				| KW_REAL						{ $$ = "double"; };
 
 				
-/* todo*/ /* prepei na mpei akoma to function*/ 
-
 
 
 /********************************************* Variables *********************************************/
@@ -231,32 +231,42 @@ subprogram: %empty { $$ = "";}
 		  | procedure_header { $$ =$1;};
 		  | function_header  { $$ =$1;};
 
-procedure_header: KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET SY_SEMICOLON procedure_body { $$ = template("procedure %s %s;",$2,$4);};
+//procedure_header: KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET SY_SEMICOLON procedure_body { $$ = template("procedure %s %s;",$2,$4);};
+procedure_header: KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET SY_SEMICOLON procedure_body { $$ = template("void %s (%s);\n%s",$2,$4,$7);};
 
-function_header: KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON { $$ = template("function %s (%s)%s;\n",$2,$4,$6);};
 
-args_decl: %empty 		{ $$ = "";}
- 	 | args_decl_list     { $$ = $1;};
+//function_header: KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON { $$ = template("function %s (%s)%s;\n",$2,$4,$6);};
+function_header: KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON function_body { $$ = template("%s %s(%s);\n",$6,$2,$4);};
+
+
+args_decl: %empty 		      { $$ = "";}
+ 	     | args_decl_list     { $$ = $1;};
 
 args_decl_list: IDENT SY_COLON advanced_data_type  { $$ = template("%s %s", $3,$1);}
 		      |  args_decl_list SY_COMMA IDENT SY_COLON advanced_data_type  { $$ = template("%s,%s %s",$1, $5,$3);};
 
+
+
+
+
 return_type: %empty  {$$="";}
 		   | advanced_data_type {$$=$1;};
 
-/* need commands first*/
 
-procedure_body: var_decl subprogram command  {$$ = template("%s %s",$1,$2);};
+procedure_body: var_decl subprogram command  {$$ = template("%s\n%s\n%s",$1,$2,$3);};
 
+
+function_body : var_decl subprogram command  {$$ = template("%s\n%s\n%s",$1,$2,$3);};
 
 
 /********************************************* Commands *********************************************/
+
 command: complex_cmd {$$=$1;};
 
 complex_cmd: KW_BEGIN simple_cmd KW_END { $$ = template("begin %s end;") ;};
 
 
-simple_cmd: SY_SEMICOLON { $$ = ";";}
+simple_cmd: SY_SEMICOLON 					{ $$ = ";";}
 		  | IDENT SY_ASSIGN expression      { $$ =template("%s=%s",$1,$3);}	//assign_cmd
 		  | KW_RESULT SY_ASSIGN expression  { $$ =template("result=%s",$3);}
 		  | if_cmd							{ $$ = $1;}
