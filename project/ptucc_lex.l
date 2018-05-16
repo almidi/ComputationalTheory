@@ -94,6 +94,7 @@ var						return KW_VAR;
 while					return KW_WHILE;
 to						return KW_TO;
 downto					return KW_DOWNTO;
+type					return KW_TYPE;
 
 {ID}  					{
 						   /* Get the macro */

@@ -50,6 +50,7 @@ extern int line_num;
 %token KW_WHILE
 %token KW_TO
 %token KW_DOWNTO
+%token KW_TYPE
 
 
 %left SY_DASH					/* -  */
@@ -87,9 +88,10 @@ extern int line_num;
 <<<<<<< Updated upstream
 %type <crepr> advanced_data_type  matrix_n var_decl_id var_decl_list /*shortcut_data_type*/
 
-%type <crepr> advanced_data_type  matrix_n  var_decl1 var_decl2 var_decl3 subprogram procedure_header 
-  
-%type <crepr>  return_type function_header
+%type <crepr> matrix_n  var_decl1 var_decl2 var_decl3 subprogram procedure_header type_def type_list shortcut_data_type
+%type <crepr> advanced_data_type
+
+%type <crepr> return_type function_header
 %type <crepr> args_decl args_decl_list  procedure_body
 %type <crepr> complex_cmd command  simple_cmd while_cmd for_cmd if_cmd else_state 
 
@@ -97,7 +99,7 @@ extern int line_num;
 
 /**********************************PROGRAM***********************************************/
 
-program:  program_decl var_decl subprogram body  SY_PERIOD    		
+program:  program_decl type_def var_decl subprogram body  SY_PERIOD    		
 
 { 
 	/* We have a successful parse! 
@@ -106,9 +108,9 @@ program:  program_decl var_decl subprogram body  SY_PERIOD
 	if(yyerror_count==0) {
 		puts(c_prologue);
 		printf("/* program  %s */ \n\n", $1);
-		printf("%s\n",$2);
 		printf("%s\n",$3);
-		printf("int main() %s \n", $4);
+		printf("%s\n",$4);
+		printf("int main() %s \n", $5);
 	}
 	else{
 		printf("error");
@@ -174,27 +176,32 @@ expression: POSINT
 
 /************************************** Data types ***************************************************/
 
+type_def : %empty				        	{ $$ = ""; } /* in case of "type" at least one shorcut must be found*/
+		 | KW_TYPE type_list SY_SEMICOLON   { $$ = template("%s;", $2); };
+
+type_list: shortcut_data_type                     
+		| type_list SY_SEMICOLON shortcut_data_type  { $$ = template("%s;\n%s", $1, $3); }; /*TODO Make sure this is correct ??*/
+
+
+shortcut_data_type: IDENT SY_EQUALS advanced_data_type 		{ $$ = template("typedef %s %s" ,$3,$1);};
+
+
+advanced_data_type: simple_data_type   						 { $$ = $1; } 
+				  | KW_ARRAY KW_OF simple_data_type 		 { $$ = template("%s*",$3);}
+				  | KW_ARRAY matrix_n KW_OF simple_data_type { $$ = template("%s %s",$4, $2); };
+
+
+matrix_n : SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET				{ $$ = template("[%s]",$2) ;}
+		 | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET 	{ $$ = template("%s[%s]",$1,$3) ;};
+
+
 simple_data_type: KW_INTEGER 					{ $$ = "int";    }
 				| KW_CHAR						{ $$ = "char"; 	 }
 				| KW_BOOLEAN					{ $$ = "bool";   }
 				| KW_REAL						{ $$ = "double"; };
 
-/*advanced_data_type redundant for now*/
-advanced_data_type: simple_data_type   						 { $$ = $1; } 
-				  | KW_ARRAY KW_OF simple_data_type 		 { $$ = template("%s*",$3);}
-				  | KW_ARRAY matrix_n KW_OF simple_data_type { $$ = template("%s %s",$4, $2); }
-				  ;
-				  
+				
 /* todo*/ /* prepei na mpei akoma to function*/ 
-/* todo*/ /* prepei na mpei akoma to syntomografies*/ 
-/*shortcut_data_type: TYPE IDENT '=' advanced_data_type ';' 	{ $$ = template("%s,%s",$2,$4); }
-				  | IDENT '=' advanced_data_type ';' 		{ $$ = template("%s,%s",$1,$3); }
-;
-*/
-matrix_n : SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET				{ $$ = template("[%s]",$2) ;}
-		 | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET 	{ $$ = template("%s[%s]",$1,$3) ;};
-
-
 
 
 
@@ -214,6 +221,8 @@ var_decl2: SY_COLON  {$$ = "";}
 
 
 var_decl3: simple_data_type SY_SEMICOLON  { $$ = $1; };
+
+
 
 
 /********************************************* Procedures *********************************************/

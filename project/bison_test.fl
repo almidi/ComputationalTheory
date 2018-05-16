@@ -5,6 +5,10 @@ var x : array  of char;
 *)
 
 program foo; 
+
+type
+    string = array of char;
+
 var x,y : char;
 var x:integer;
 	x : array[1] of char;

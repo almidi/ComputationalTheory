@@ -81,28 +81,29 @@ extern int yydebug;
     KW_WHILE = 291,
     KW_TO = 292,
     KW_DOWNTO = 293,
-    SY_DASH = 294,
-    SY_PLUS = 295,
-    SY_STAR = 296,
-    SY_SLASH = 297,
-    SY_EQUALS = 298,
-    SY_LESS = 299,
-    SY_GREATER = 300,
-    SY_LESS_EQUALS = 301,
-    SY_GREATER_EQUALS = 302,
-    SY_LESS_BIGGER = 303,
-    SY_AND = 304,
-    SY_OR = 305,
-    SY_ASSIGN = 306,
-    SY_NOT = 307,
-    SY_COMMA = 308,
-    SY_LEFT_SQR_BRACKET = 309,
-    SY_RIGHT_SQR_BRACKET = 310,
-    SY_COLON = 311,
-    SY_SEMICOLON = 312,
-    SY_PERIOD = 313,
-    SY_LEFT_BRACKET = 314,
-    SY_RIGHT_BRACKET = 315
+    KW_TYPE = 294,
+    SY_DASH = 295,
+    SY_PLUS = 296,
+    SY_STAR = 297,
+    SY_SLASH = 298,
+    SY_EQUALS = 299,
+    SY_LESS = 300,
+    SY_GREATER = 301,
+    SY_LESS_EQUALS = 302,
+    SY_GREATER_EQUALS = 303,
+    SY_LESS_BIGGER = 304,
+    SY_AND = 305,
+    SY_OR = 306,
+    SY_ASSIGN = 307,
+    SY_NOT = 308,
+    SY_COMMA = 309,
+    SY_LEFT_SQR_BRACKET = 310,
+    SY_RIGHT_SQR_BRACKET = 311,
+    SY_COLON = 312,
+    SY_SEMICOLON = 313,
+    SY_PERIOD = 314,
+    SY_LEFT_BRACKET = 315,
+    SY_RIGHT_BRACKET = 316
   };
 #endif
 
@@ -115,7 +116,7 @@ union YYSTYPE
 
 	char* crepr;
 
-#line 119 "ptucc_parser.tab.h" /* yacc.c:1909  */
+#line 120 "ptucc_parser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
