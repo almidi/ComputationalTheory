@@ -14,6 +14,14 @@ char *s ;
 char* mactable[MAXMACRO][2];
 int mactable_size = 0;
 
+
+/* Macro buffer = 32 different macros*/
+//#define MAXDEF 32
+char* deftable[MAXDEF];
+int deftable_size;
+
+
+
 /* Return 1 on success, 0 on failure (macro table full) */
 int set_macro(char* name, char* def);
 
@@ -98,12 +106,20 @@ type					return KW_TYPE;
 
 {ID}  					{
 						   /* Get the macro */
-						   char* def = get_macro(yytext);
+						   char* def = get_macro(yytext);	
+						   int type_def = get_def(yytext);
+
 						   if(def==NULL) {
 						   		yylval.crepr = strdup(yytext);
-						   		/* If no macro found, Return IDENT*/
-						   		/*TODO Check what IDENT is*/
-						   		return IDENT;
+						   		/* If no macro found, Check if ID is a defined TYPE*/
+						   		if(type_def==1){
+						   			/*Return ID as Defined TYPE*/
+						   			return DEF_TYPE;
+						   		}
+						   		else{
+						   			/*Return ID as IDENT*/
+						   			return IDENT;
+						   		}
 						   }
 						   /*Else put the macro back in yytext to be processed normaly */
 						   for(int i=strlen(def); i>0; i--) {

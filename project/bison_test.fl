@@ -13,14 +13,14 @@ var x,y : char;
 	k:integer;
 	l : array[1] of char;
 	o: array of boolean;
-	e :strikng;
+	e :string;
 
 
 (*function b();*)
 procedure c();
 
 begin
-	writeString('Hello world')
+	writeString((string)'Hello world')
 end;
 
 begin

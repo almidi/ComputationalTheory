@@ -7,6 +7,45 @@
 
 extern int line_num;
 
+extern char* deftable[];
+extern int deftable_size;
+
+
+/* Return 1 on success, 0 on failure (def table full) */
+int set_def(char* def)
+{
+	/* Check to see if def already defined, and redefine it. */
+	int i;
+	for(i=0; i<deftable_size; i++) {
+		if(strcmp(deftable[i], def)==0) {
+			/* found ! */
+			free(def);
+			break;
+		}
+	}
+
+	if(i<deftable_size)
+		return 1;
+	else if(deftable_size < MAXDEF) {
+		/* new entry */
+		assert(i==deftable_size);
+		deftable[i] = def;
+		deftable_size++;
+		return 1;
+	}
+	else
+		return 0;
+}
+
+/* Return 1 for def, or 0 if no such def is defined. */
+int get_def(char* def)
+{
+	for(int i=0;i<deftable_size; i++) {
+		if(strcmp(deftable[i], def)==0)
+			return 1;
+	}
+	return 0;
+}
 
 
 void ssopen(sstream* S)
@@ -82,7 +121,9 @@ int yyerror_count = 0;
 const char* c_prologue = 
 "#include \"ptuclib.h\"\n"
 "\n"
+
 ;
+
 
 
 

@@ -1,5 +1,6 @@
 #ifndef CGEN_H
 #define CGEN_H
+#define MAXDEF 32
 
 /*
 	String streams are handy for using standard C-library
@@ -42,6 +43,13 @@ extern const char* c_prologue;
  Return the corrected string (maybe the same as P).
 */
 char* string_ptuc2c(char* P);
+
+
+/* Return 1 on success, 0 on failure (def table full) */
+int set_def(char* def);
+
+/* Return 1 for def, or 0 if no such def is defined. */
+int get_def(char* def);
 
 
 #endif
