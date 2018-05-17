@@ -148,8 +148,11 @@ binary_exp         : expression SY_DASH				expression { $$ = template("%s-%s" , 
                    | expression SY_GREATER_EQUALS	expression { $$ = template("%s<>%s", $1, $3);};
                    | expression SY_LESS_BIGGER		expression { $$ = template("%s>=%s", $1, $3);};
                    | expression SY_AND				expression { $$ = template("%s&&%s", $1, $3);};
+                   | expression KW_AND				expression { $$ = template("%s&&%s", $1, $3);};
                    | expression SY_OR				expression { $$ = template("%s||%s", $1, $3);};
                    | expression SY_ASSIGN			expression { $$ = template("%s:=%s", $1, $3);};
+                   | expression KW_MOD				expression { $$ = template("%s%%s" , $1, $3);};
+                   | expression KW_DIV				expression { $$ = template("%sdiv%s",$1, $3);};
 
 
 expression         : POSINT
@@ -304,8 +307,8 @@ if_cmd: KW_IF expression KW_THEN all_commands      			{ $$ =template("if(%s){\n\
 	  | KW_ELSE all_commands 								{ $$ =template("else (%s){\n\t%s}\n",$2);}
 
 */
-else_state: KW_ELSE all_commands { $$ = template("else{\n\t%s}",$2);};
-		  | %empty {$$ = "";};
+else_state: KW_ELSE all_commands{ $$ = template("else{\n\t%s}",$2);}
+		  | all_commands;
 
 %%
 /*
