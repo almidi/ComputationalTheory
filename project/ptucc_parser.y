@@ -27,10 +27,10 @@ extern int line_num;
 %token KW_PROGRAM 
 %token KW_BEGIN 
 %token KW_END
-%token KW_AND
-%token KW_DIV
+%left KW_AND
+%left KW_DIV
 %token KW_FUNCTION
-%token KW_MOD
+%left  KW_MOD
 %token KW_PROCEDURE
 %token KW_RESULT
 %token KW_ARRAY
@@ -39,11 +39,11 @@ extern int line_num;
 %token KW_NOT
 %token KW_RETURN
 %token KW_BOOLEAN
-%token KW_ELSE
+%right KW_ELSE
 %token KW_IF
 %token KW_OF
 %token KW_REAL
-%token KW_THEN
+%right KW_THEN
 %token KW_CHAR
 %token KW_FOR
 %token KW_INTEGER
@@ -92,7 +92,7 @@ extern int line_num;
 
 %type <crepr> return_type function_header function_body
 %type <crepr> args_decl args_decl_list  procedure_body subprogram subprogram_list procedure_header 
-%type <crepr> cmd_list all_commands complex_cmd simple_cmd  for_cmd while_cmd // if_cmd else_state  
+%type <crepr> cmd_list all_commands complex_cmd simple_cmd  for_cmd while_cmd  if_cmd  else_state  
 
 %%
 
@@ -275,16 +275,16 @@ cmd_list           : %empty { $$ = "";} //list of simple commands
                    |cmd_list SY_SEMICOLON simple_cmd { $$ = template("%s;\n%s",$1,$3) ;};
 
 
-simple_cmd         : IDENT SY_ASSIGN expression      { $$ =template("%s=%s",$1,$3);}	//assign_cmd
-                   | KW_RESULT SY_ASSIGN expression  { $$ =template("result=%s",$3);}
-		 //        | if_cmd						{ $$ = $1;}
-                   | for_cmd							{ $$ = $1;}
-                   | while_cmd						{ $$ = $1;}
-                   | IDENT SY_COLON all_commands		{ $$ = template("%s: %s",$1,$3);} //TODO does all_commands need brackets in labels ?
-                   | KW_GOTO IDENT   				{ $$ = template("goto %s",$2);}
-                   | KW_RETURN						{ $$ = template("return");}
-                   | IDENT SY_LEFT_BRACKET arglist 	{ $$ = template("%s(%s)\n",$1,$3);}
-                   | proc_call  						{ $$ = template("%s", $1); };
+simple_cmd: IDENT SY_ASSIGN expression      { $$ =template("%s=%s",$1,$3);}	//assign_cmd
+		  | KW_RESULT SY_ASSIGN expression  { $$ =template("result=%s",$3);}
+		  | if_cmd						    { $$ = $1;}
+		  | for_cmd							{ $$ = $1;}
+		  | while_cmd						{ $$ = $1;}
+		  | IDENT SY_COLON all_commands		{ $$ = template("%s: %s",$1,$3);} //TODO does all_commands need brackets in labels ?
+		  | KW_GOTO IDENT   				{ $$ = template("goto %s",$2);}
+		  | KW_RETURN						{ $$ = template("return");}
+		  | IDENT SY_LEFT_BRACKET arglist 	{ $$ = template("%s(%s)\n",$1,$3);}
+		  | proc_call  						{ $$ = template("%s", $1); };
 
 /*Processes and functions*/
 proc_call          : IDENT SY_LEFT_BRACKET arguments SY_RIGHT_BRACKET		{ $$ = template("%s(%s)", $1, $3); }; /* identifier (arguments)*/
@@ -295,15 +295,17 @@ while_cmd          : KW_WHILE expression KW_DO all_commands	 {$$ =template("whil
 for_cmd            : KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO all_commands 	   { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}",$2,$4,$2,$6,$2,$8); }
                    | KW_FOR IDENT SY_ASSIGN expression KW_DOWNTO expression KW_DO all_commands { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}",$2,$4,$2,$6,$2,$8); };
 
+
+if_cmd: KW_IF expression KW_THEN all_commands else_state { $$ = template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
+
 /*
-if_cmd            : KW_IF expression KW_THEN cmd_list else_state { $$ =template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
-
-
-
-else_state        : %empty { $$ = "";}
-                  | KW_ELSE cmd_list{ $$ = template("else{\n\t%s}",$2);};
+if_cmd: KW_IF expression KW_THEN all_commands      			{ $$ =template("if(%s){\n\t%s}\n",$2,$4);}
+	  | KW_ELSE KW_IF expression KW_THEN all_commands      	{ $$ =template("else if(%s){\n\t%s}\n",$3,$5);}
+	  | KW_ELSE all_commands 								{ $$ =template("else (%s){\n\t%s}\n",$2);}
 
 */
+else_state: KW_ELSE all_commands { $$ = template("else{\n\t%s}",$2);};
+		  | %empty {$$ = "";};
 
 %%
 /*
