@@ -7,8 +7,53 @@
 
 extern int line_num;
 
+
 extern char* deftable[];
 extern int deftable_size;
+
+
+extern char* mactable_name[];
+extern char* mactable_def[];
+extern int mactable_size;
+
+/* Return 1 on success, 0 on failure (macro table full) */
+int set_macro(char* name, char* def)
+{
+	/* Check to see if macro already defined, and redefine it. */
+	int i;
+	for(i=0; i<mactable_size; i++) {
+		if(strcmp(mactable_name[i], name)==0) {
+			/* found ! */
+			free(name);
+			free(mactable_def[i]);
+			mactable_def[i] = def;
+			break;
+		}
+	}
+
+	if(i<mactable_size)
+		return 1;
+	else if(mactable_size < MAXMACRO) {
+		/* new entry */
+		assert(i==mactable_size);
+		mactable_name[i] = name;
+		mactable_def[i] = def;
+		mactable_size++;
+		return 1;
+	}
+	else
+		return 0;
+}
+
+/* Return def for macro, or NULL if no such macro is defined. */
+char* get_macro(char* name)
+{
+	for(int i=0;i<mactable_size; i++) {
+		if(strcmp(mactable_name[i], name)==0)
+			return mactable_def[i];
+	}
+	return NULL;
+}
 
 
 /* Return 1 on success, 0 on failure (def table full) */

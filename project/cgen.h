@@ -1,6 +1,9 @@
 #ifndef CGEN_H
 #define CGEN_H
+
 #define MAXDEF 32
+#define MAXMACRO 32
+
 
 /*
 	String streams are handy for using standard C-library
@@ -51,5 +54,10 @@ int set_def(char* def);
 /* Return 1 for def, or 0 if no such def is defined. */
 int get_def(char* def);
 
+/* Return 1 on success, 0 on failure (macro table full) */
+int set_macro(char* name, char* def);
+
+/* Return def for macro, or NULL if no such macro is defined. */
+char* get_macro(char* name);
 
 #endif
