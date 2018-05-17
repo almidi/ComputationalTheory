@@ -10,9 +10,10 @@ type
     string = array of char;
 
 var x,y : char;
-	x:integer;
-	x : array[1] of char;
-	x: array of boolean;
+	k:integer;
+	l : array[1] of char;
+	o: array of boolean;
+	e :strikng;
 
 
 (*function b();*)

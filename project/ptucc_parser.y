@@ -1,9 +1,56 @@
 %{
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 #include "cgen.h"
 extern int yylex(void);
 extern int line_num;
+
+/* Macro buffer = 32 different defs*/
+#define MAXDEF 32
+char* deftable[MAXDEF];
+int deftable_size = 0;
+
+/* Return 1 on success, 0 on failure (def table full) */
+int set_def(char* def)
+{
+	/* Check to see if def already defined, and redefine it. */
+	int i;
+	for(i=0; i<deftable_size; i++) {
+		if(strcmp(deftable[i], def)==0) {
+			/* found ! */
+			free(def);
+			break;
+		}
+	}
+
+	if(i<deftable_size)
+		return 1;
+	else if(deftable_size < MAXDEF) {
+		/* new entry */
+		assert(i==deftable_size);
+		deftable[i] = def;
+		deftable_size++;
+		return 1;
+	}
+	else
+		return 0;
+}
+
+/* Return 1 for def, or 0 if no such def is defined. */
+int get_def(char* def)
+{
+	for(int i=0;i<deftable_size; i++) {
+		if(strcmp(deftable[i], def)==0)
+			return 1;
+	}
+	return 0;
+}
+
+
+
 %}
 
 %union
@@ -100,6 +147,7 @@ program:  program_decl type_def var_decl subprogram_list complex_cmd  SY_PERIOD
 	/* We have a successful parse! 
 		Check for any errors and generate output. 
 	*/
+
 	if(yyerror_count==0) {
 		puts(c_prologue);
 		printf("/* program  %s */ \n\n", $1);
@@ -109,7 +157,7 @@ program:  program_decl type_def var_decl subprogram_list complex_cmd  SY_PERIOD
 		printf("int main(){%s} \n", $5);
 	}
 	else{
-		printf("error");
+		printf("%d Errors Detected. Exiting\n",yyerror_count);
 	}
 };
 
@@ -121,7 +169,7 @@ program_decl : KW_PROGRAM IDENT SY_SEMICOLON  	{ $$ = $2; }; /*Return Identifier
 arguments :	%empty							{ $$ = ""; }  /* init empty argumetns */
 	 	  | arglist 						{ $$ = $1; }; /* list arguments */ 
 
-arglist: expression							{ $$ = $1; }  /* an expression TODO can be empty*/
+arglist: expression							{ $$ = $1; }  
        | arglist SY_COMMA expression 		{ $$ = template("%s,%s", $1, $3);  }; /*recursive for more expressions */
 
 
@@ -167,7 +215,9 @@ type_def : %empty				        	{ $$ = ""; } /* in case of "type" at least one sho
 type_list	: shortcut_data_type  { $$ = template("%s", $1); }; /*TODO Make sure this is correct ??*/
 			| type_list shortcut_data_type;
 
-shortcut_data_type: IDENT SY_EQUALS advanced_data_type SY_SEMICOLON { $$ = template("typedef %s %s;\n",$3,$1);}; //SAVE SOMEWHERE THE FEFINED DATA TYPES
+shortcut_data_type: IDENT SY_EQUALS advanced_data_type SY_SEMICOLON { $$ = template("typedef %s %s;\n",$3,$1); //SAVE SOMEWHERE THE FEFINED DATA TYPES
+																	  set_def(strdup($1));
+																	};
 
 
 advanced_data_type: simple_data_type   						 { $$ = $1; } //TODO split to all_data_types
@@ -183,7 +233,10 @@ simple_data_type: KW_INTEGER 					{ $$ = "int";    }
 				| KW_CHAR						{ $$ = "char"; 	 }
 				| KW_BOOLEAN					{ $$ = "bool";   }
 				| KW_REAL						{ $$ = "double"; }
-				| IDENT 						; //TODO CHECK THIS IDENTIFIER IF EXISTS IN TYPEDEF DEFINED DATA TYPES
+				| IDENT 						{ if(get_def($1)!=1){ //TODO CHECK THIS IDENTIFIER IF EXISTS IN TYPEDEF DEFINED DATA TYPES
+													yyerror(template("Error: \"%s\" No Such Data Type Defined\n"),$1);
+													yyerror_count++ ;
+												}}; 
 
 				
 
@@ -293,3 +346,4 @@ int main(){
 	yyparse();
 }
 */
+

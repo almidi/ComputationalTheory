@@ -36,7 +36,7 @@ end;
 procedure eval(prompt: string; f: intfunc; val: integer);
 begin
 	writeString(prompt); 
-	writeString('('); writeInteger(val); writeString(')=');
+	writeString('('); writeInteger(val); writeString(")=");
 	writeInteger(f(val));
 	writeString('\n')
 end;

@@ -24,11 +24,11 @@ char* get_macro(char* name);
 
 BOOL 		("true"|"false")
 ID 			[a-zA-Z_][0-9a-zA-Z_]*
+STRING  	((\")(\\[ntr\\\'\"]|[^\"])*(\"))|((\')(\\[ntr\\\'\"]|[^\'])*(\'))
 DIGIT  		[0-9]
 NUMBER  	{DIGIT}{DIGIT}*
 DECIMAL 	("."{NUMBER})|({NUMBER}("."{NUMBER}?)?)
 REAL    	{DECIMAL}([eE][+-]?{NUMBER})?
-STRING  	(\')(\\[ntr\\\'\"]|[^\'])*(\')|(\")(\\[ntr\\\'\"]|[^(\")])*(\")
 RELOP		["&&"|"||"|"!"]
 
 

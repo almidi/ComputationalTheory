@@ -7,6 +7,8 @@
 
 extern int line_num;
 
+
+
 void ssopen(sstream* S)
 {
 	S->stream = open_memstream(& S->buffer, & S->bufsize);

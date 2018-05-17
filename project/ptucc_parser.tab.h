@@ -112,7 +112,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 10 "ptucc_parser.y" /* yacc.c:1909  */
+#line 57 "ptucc_parser.y" /* yacc.c:1909  */
 
 	char* crepr;
 
