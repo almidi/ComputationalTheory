@@ -70,10 +70,10 @@ int get_def(char* def)
 %token KW_PROGRAM 
 %token KW_BEGIN 
 %token KW_END
-%token KW_AND
-%token KW_DIV
+%left KW_AND
+%left KW_DIV
 %token KW_FUNCTION
-%token KW_MOD
+%left  KW_MOD
 %token KW_PROCEDURE
 %token KW_RESULT
 %token KW_ARRAY
@@ -82,11 +82,11 @@ int get_def(char* def)
 %token KW_NOT
 %token KW_RETURN
 %token KW_BOOLEAN
-%token KW_ELSE
+%right KW_ELSE
 %token KW_IF
 %token KW_OF
 %token KW_REAL
-%token KW_THEN
+%right KW_THEN
 %token KW_CHAR
 %token KW_FOR
 %token KW_INTEGER
@@ -135,7 +135,7 @@ int get_def(char* def)
 
 %type <crepr> return_type function_header function_body
 %type <crepr> args_decl args_decl_list  procedure_body subprogram subprogram_list procedure_header 
-%type <crepr> cmd_list all_commands complex_cmd simple_cmd  for_cmd while_cmd // if_cmd else_state  
+%type <crepr> cmd_list all_commands complex_cmd simple_cmd  for_cmd while_cmd  if_cmd  else_state  
 
 %%
 
@@ -190,14 +190,17 @@ binary_exp : expression SY_DASH				expression { $$ = template("%s-%s" , $1, $3);
 		   | expression SY_GREATER_EQUALS	expression { $$ = template("%s<>%s", $1, $3);};
 		   | expression SY_LESS_BIGGER		expression { $$ = template("%s>=%s", $1, $3);};
 		   | expression SY_AND				expression { $$ = template("%s&&%s", $1, $3);};
+		   | expression KW_AND				expression { $$ = template("%s&&%s", $1, $3);};
 		   | expression SY_OR				expression { $$ = template("%s||%s", $1, $3);};
 		   | expression SY_ASSIGN			expression { $$ = template("%s:=%s", $1, $3);};
-
+		   | expression KW_MOD				expression { $$ = template("%s%%s" , $1, $3);};
+		   | expression KW_DIV				expression { $$ = template("%sdiv%s",$1, $3);};
+		   //TODO finish the expressions
 
 expression: POSINT
           | REAL							
           | STRING 							{ $$ = string_ptuc2c($1); };
-//          |	BOOL 							
+          |	BOOL 							
           |	IDENT
           | KW_RESULT									 { $$ = "result";};
           | SY_LEFT_BRACKET expression SY_RIGHT_BRACKET  { $$ = $2;}; /* needs fixing for precedence */
@@ -312,7 +315,7 @@ cmd_list: %empty { $$ = "";} //list of simple commands
 
 simple_cmd: IDENT SY_ASSIGN expression      { $$ =template("%s=%s",$1,$3);}	//assign_cmd
 		  | KW_RESULT SY_ASSIGN expression  { $$ =template("result=%s",$3);}
-		 // | if_cmd						{ $$ = $1;}
+		  | if_cmd						    { $$ = $1;}
 		  | for_cmd							{ $$ = $1;}
 		  | while_cmd						{ $$ = $1;}
 		  | IDENT SY_COLON all_commands		{ $$ = template("%s: %s",$1,$3);} //TODO does all_commands need brackets in labels ?
@@ -330,15 +333,17 @@ while_cmd: KW_WHILE expression KW_DO all_commands	 {$$ =template("while(%s){%s}"
 for_cmd: KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO all_commands 	   { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}",$2,$4,$2,$6,$2,$8); }
 	   | KW_FOR IDENT SY_ASSIGN expression KW_DOWNTO expression KW_DO all_commands { $$ =template("for(%s=%s; %s=%s; %s++){\n\t%s\n}",$2,$4,$2,$6,$2,$8); };
 
+
+if_cmd: KW_IF expression KW_THEN all_commands else_state { $$ = template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
+
 /*
-if_cmd: KW_IF expression KW_THEN cmd_list else_state { $$ =template("if(%s){\n\t%s}\n%s",$2,$4,$5);};
-
-
-
-else_state: %empty { $$ = "";}
-		  | KW_ELSE cmd_list{ $$ = template("else{\n\t%s}",$2);};
+if_cmd: KW_IF expression KW_THEN all_commands      			{ $$ =template("if(%s){\n\t%s}\n",$2,$4);}
+	  | KW_ELSE KW_IF expression KW_THEN all_commands      	{ $$ =template("else if(%s){\n\t%s}\n",$3,$5);}
+	  | KW_ELSE all_commands 								{ $$ =template("else (%s){\n\t%s}\n",$2);}
 
 */
+else_state: KW_ELSE all_commands { $$ = template("else{\n\t%s}",$2);};
+		  | %empty {$$ = "";};
 
 %%
 /*
