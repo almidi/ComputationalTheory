@@ -22,8 +22,8 @@ program useless;
         end;
 
     begin
-
-        writeString('Computed (N-n)+k^3 = '); 
+        j := (integer) (N - n) + cube(k);
+        writeString("Computed (N-n)+k^3 = "); 
         writeInteger(j); nl()
     end;
 

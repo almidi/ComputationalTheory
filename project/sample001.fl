@@ -6,6 +6,6 @@ program foo;
 
 begin
 	writeString('Hello world');
-	writeString('l\n')
+	writeString('\n')
 end.
 

@@ -152,6 +152,10 @@ char* string_ptuc2c(char* P)
 /*
 	Report errors 
 */
+
+int yyerror_count = 0;
+
+
  void yyerror (char const *pat, ...) {
  	va_list arg;
     fprintf (stderr, "line %d: ", line_num);
@@ -159,9 +163,10 @@ char* string_ptuc2c(char* P)
     va_start(arg, pat);
     vfprintf(stderr, pat, arg);
     va_end(arg);
+
+    yyerror_count++; //Add Error Count
  }
 
-int yyerror_count = 0;
 
 const char* c_prologue = 
 "#include \"ptuclib.h\"\n"

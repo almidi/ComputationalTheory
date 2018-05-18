@@ -98,6 +98,15 @@ to						return KW_TO;
 downto					return KW_DOWNTO;
 type					return KW_TYPE;
 
+{BOOL}					{ char* token = strdup(yytext);
+						  if(token[0]=='t'){
+						  	yylval.crepr = strdup("1");
+						  }
+						  else{
+						  	yylval.crepr = strdup("0");
+						  }
+						  return BOOL;
+						}
 {ID}  					{
 						   /* Get the macro */
 						   char* def = get_macro(yytext);	

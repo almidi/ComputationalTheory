@@ -9,6 +9,7 @@ program calculate;
         var i: integer; isPrime: boolean;
 
     begin
+
         if n < 0 then
             result := prime(-n)
         else if n < 2 then
