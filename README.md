@@ -27,5 +27,6 @@ gcc -Wall -std=c11 -o sample001 sample001.c
 Hello world
 
 
-5) Have a good study !!
+5) Test Everything 
+% make testall
 
