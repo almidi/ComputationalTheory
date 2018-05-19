@@ -4,6 +4,12 @@
 #define MAXDEF 32
 #define MAXMACRO 32
 
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+#define SE ANSI_COLOR_RED "Syntax Error: " ANSI_COLOR_RESET
+#define LE ANSI_COLOR_RED "Lexical Error: " ANSI_COLOR_RESET
+
 
 /*
 	String streams are handy for using standard C-library
@@ -47,6 +53,11 @@ extern const char* c_prologue;
 */
 char* string_ptuc2c(char* P);
 
+//Spread funcrion declarations and variables for C compatibility
+char* func_spread(char* strt,char* type,char* vars, char* del) ;
+
+//Spread variables for C compatibility
+char* vars_spread(char* strt,char* type, char* del) ;
 
 /* Return 1 on success, 0 on failure (def table full) */
 int set_def(char* def);

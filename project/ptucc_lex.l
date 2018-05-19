@@ -182,7 +182,7 @@ type					return KW_TYPE;
 \n 						++line_num;
 <<EOF>>					return EOF;
 
-.        { yyerror("lexical error: unrecognized literal '%s'\n", yytext); }
+.        { yyerror(LE"unrecognized literal '%s'\n", yytext); }
 
 
 %%

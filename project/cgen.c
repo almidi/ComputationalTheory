@@ -146,6 +146,47 @@ char* string_ptuc2c(char* P)
 	return P;
 }
 
+//Spread funcrion declarations and variables for C compatibility
+char* func_spread(char* strt,char* type,char* vars, char* del) {
+    sstream S;
+    ssopen(&S);
+
+    fprintf(S.stream, "%s (*",type);
+    for(int i =0 ; i < strlen(strt);i++){
+        if(strt[i] == ','){
+            fprintf(S.stream, ")(%s)%s %s (*",vars,del,type);
+        }
+        else{
+            fprintf(S.stream, "%c", strt[i] );
+        }
+    }
+    fprintf(S.stream, ")(%s)",vars);
+    char* ret = ssvalue(&S);
+    ssclose(&S);
+
+    return ret;
+}
+
+//Spread variables for C compatibility
+char* vars_spread(char* strt,char* type, char* del) {
+    sstream S;
+    ssopen(&S);
+
+    fprintf(S.stream, "%s ",type);
+    for(int i =0 ; i < strlen(strt);i++){
+        if(strt[i] == ','){
+            fprintf(S.stream, "%s %s ",del,type);
+        }
+        else{
+            fprintf(S.stream, "%c", strt[i] );
+        }
+    }
+    char* ret = ssvalue(&S);
+    ssclose(&S);
+
+    return ret ;
+}
+
 
 
 
