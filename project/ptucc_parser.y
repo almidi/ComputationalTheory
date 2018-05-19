@@ -103,6 +103,7 @@ extern int line_num;
 
 %%
 
+
 /**********************************PROGRAM***********************************************/
 
 program   		   : program_decl type_def var_decl subprogram_list complex_cmd  SY_PERIOD			            { 
@@ -122,21 +123,26 @@ program   		   : program_decl type_def var_decl subprogram_list complex_cmd  SY_
                                																}
                                															}
                    | program_decl type_def var_decl subprogram_list complex_cmd error                                   { yyerror(SE"Period Expected\n");YYABORT;}
-                   | program_decl type_def var_decl subprogram_list error                                               { yyerror(SE"Complex Command Expected\n");YYABORT;}
-                   | error 														            { yyerror(SE"Program Declaration Expected\n");YYABORT;}
+                   | program_decl type_def var_decl subprogram_list error                                               { yyerror(SE"Complex Command Expected\n");YYABORT; }
+                   | error 														           							 	{ yyerror(SE"Program Declaration Expected\n");YYABORT;}
                    ;
 
 
 
 program_decl       : KW_PROGRAM IDENT SY_SEMICOLON                                                                      { $$ = $2; } /*Return Identifier*/
+				   | KW_PROGRAM IDENT  error                                                                     		{ yyerror(SE"Semicolon missing\n");} /*Return Identifier*/
+				   | KW_PROGRAM error                                                                      				{ yyerror(SE"Identifier missing\n");} /*Return Identifier*/
+				   | error                                                                     							{ yyerror(SE"Keyword program missing\n");} /*Return Identifier*/
 				   ; 
 
-arguments          : %empty                                                                                          { $$ = ""; } /* init empty argumetns */
+arguments          : %empty                                                                                             { $$ = ""; } /* init empty argumetns */
                    | arglist                                                                                            { $$ = $1; } /* list arguments */ 
                    ; 
 
 arglist            : expression                                                                                         { $$ = $1; }  
                    | arglist SY_COMMA expression                                                                        { $$ = template("%s,%s", $1, $3);  } /*recursive for more expressions */
+                  // | error          {yyerror(SE"arguments incorrect1\n"); }                                                                              
+                   | arglist  error     {yyerror(SE"arguments incorrect\n"); }                                                                   
                    ; 
 
 
@@ -192,28 +198,36 @@ type_def           : %empty                                                     
 
 type_list          : shortcut_data_type                                                                                  /*TODO Make sure this is correct ??*/
                    | type_list shortcut_data_type																		{ $$ = template("%s\n%s", $1,$2); } 
+                   //| error {yyerror(SE"Incorrect expression at type\n");}
                    ;
 
 shortcut_data_type : IDENT SY_EQUALS advanced_data_type SY_SEMICOLON                                                    { $$ = template("typedef %s %s;\n",$3,$1); 
-																	   		        set_def(strdup($1));} //SAVE SOMEWHERE THE FEFINED DATA TYPES
-			 | IDENT SY_EQUALS adv_func_data_type SY_SEMICOLON                                                    { $$ = template("typedef %s(*%s)(%s);\n",$3[0],$1,$3[1]);
-				   																  set_def(strdup($1));} //TODO Check if this is ortho
-			 ;
-
+																   		        										set_def(strdup($1));} //SAVE SOMEWHERE THE DEFINED DATA TYPES
+				   | IDENT SY_EQUALS adv_func_data_type SY_SEMICOLON                                                    		{ $$ = template("typedef %s(*%s)(%s);\n",$3[0],$1,$3[1]);
+			  		 																  									set_def(strdup($1));} //TODO Check if this is ortho
+					 
+					| IDENT SY_EQUALS error 							{yyerror(SE"data type expected\n");}
+					//| IDENT error							  			{yyerror(SE"equals expected\n");}
+					| IDENT SY_EQUALS advanced_data_type error   		{yyerror(SE"semicolon expected\n"); }
+					;
 
 advanced_data_type : simple_data_type                                                                                   { $$ = $1; } //TODO split to all_data_types
                    | KW_ARRAY KW_OF simple_data_type                                                                    { $$ = template("%s*",$3);}
                    | KW_ARRAY matrix_n KW_OF simple_data_type                                                           { $$ = template("%s %s",$4, $2); }
+                   | KW_ARRAY error 									{yyerror(SE"Error using array data type\n"); }
                    ;
 
 //Distinct Function advanced data type due to syntax differences in compiling
 adv_func_data_type : KW_FUNCTION SY_LEFT_BRACKET args_decl_excl SY_RIGHT_BRACKET return_type                            { $$[0] = $5; $$[1] = $3;} // [return_type , arguments]
+                   | KW_FUNCTION error 									{yyerror(SE"error using function data type\n"); }
                    ;
 
 
 
 matrix_n           : SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET                                                    { $$ = template("[%s]",$2) ;}
                    | matrix_n SY_LEFT_SQR_BRACKET POSINT SY_RIGHT_SQR_BRACKET                                           { $$ = template("%s[%s]",$1,$3) ;}
+                   | SY_LEFT_SQR_BRACKET error SY_RIGHT_SQR_BRACKET   {yyerror(SE"Positive integer expected\n");}
+                   | SY_LEFT_SQR_BRACKET error   					  {yyerror(SE"error declaring array\n");}
                    ;
 
 
@@ -231,18 +245,20 @@ simple_data_type   : KW_INTEGER                                                 
 
 var_decl           : %empty                                                                                             { $$ = ""; } 
                    | KW_VAR var_decl_list SY_SEMICOLON                                                                  { $$ = $2; }
+                   | KW_VAR var_decl_list error   {yyerror("var decl semicolon expected\n");} 
                    ;
 
 var_decl_list      : var_list SY_COLON advanced_data_type                                                               { $$ = template("%s %s;\n",$3 ,$1);}
                    | var_list SY_COLON adv_func_data_type                                                               { $$ = template("%s;\n",func_spread($1,$3[0],$3[1], ";"));}
                    | var_decl_list SY_SEMICOLON var_list SY_COLON advanced_data_type                                    { $$ = template("%s %s %s;\n",$1, $5 ,$3);} //////////needs treatment
                    | var_decl_list SY_SEMICOLON var_list SY_COLON adv_func_data_type                                    { $$ = template("%s %s;\n",$1, func_spread($3,$5[0],$5[1], ";") );} //////////needs treatment
-                   ;
+                   | var_list SY_COLON     									 	{yyerror("data type expected\n");}
+                    ;
 
 
 
 var_list           : IDENT                                                                                              { $$ = template("%s",$1);}
-                   | var_list SY_COMMA IDENT                                                                            { $$=template("%s,%s",$1,$3);}
+                   | var_list SY_COMMA IDENT                                                                            { $$ =template("%s,%s",$1,$3);}
                    ;
 
 
@@ -260,12 +276,18 @@ subprogram_list    : %empty                                                     
 
 //procedure_header 
 procedure_header   : KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET SY_SEMICOLON procedure_body          { $$ = template("void %s (%s){%s}\n",$2,$4,$7);}
-			 ;
-
-
+			 	   | KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET error 								{yyerror(SE"semicolon expected at the end of procedure declaration\n");} ;
+			 	   | KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl  error 				 								{yyerror(SE"')' expected at procedure declaration\n");} ;
+			 	   | KW_PROCEDURE IDENT  error  						 				 								{yyerror(SE"'(argumetns);' expected at procedure declaration\n");} ;
+			 	   | KW_PROCEDURE error 								 				 								{yyerror(SE"procedure declaration incomplete\n");} ;
 //function_header  
-function_header    : KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON function_body{ $$ = template("%s %s(%s){\n %s result; %s\n }\n",$6,$2,$4,$6,$8);}
-			 ;
+function_header    : KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON function_body { $$ = template("%s %s(%s){\n %s result; %s\n }\n",$6,$2,$4,$6,$8);}
+				   //| KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type error 					 {yyerror(SE"semicolon expected at funciton declaration\n");} ;
+			 	   | KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl  error 												 {yyerror(SE"')' expected at funciton declaration\n");} ;
+			 	   | KW_FUNCTION IDENT  error 																			 {yyerror(SE"'(argumetns);' expected at funciton declaration\n");} ;
+			 	   | KW_FUNCTION error 																					 {yyerror(SE"funciton declaration incomplete\n");} ;
+
+
 
 //Arguments Declaration demanding argument names
 args_decl          : %empty                                                                                             { $$ = "";}
@@ -304,24 +326,27 @@ args_decl_excl_list: var_list SY_COLON advanced_data_type                       
 
 
 
+//TODO  put rules for error detection
 
 
 
 
 
-
-return_type        : %empty                                                                                             { $$=""; yyerror("return type expected");}
+return_type        : %empty                                                                                             { yyerror(SE"return type expected\n");}
                    | SY_COLON advanced_data_type                                                                        { $$=$2;}
                    ;
 
 
 procedure_body     : var_decl subprogram_list complex_cmd SY_SEMICOLON                                                  { $$ = template("\n%s%s%s",$1,$2,$3);}
-			 ;
-
+				   | var_decl subprogram_list complex_cmd error   														{ yyerror(SE"semicolon expected at end of procedure body\n");} ;
+				   | var_decl subprogram_list  error 																	{ yyerror(SE"Complex command expected\n");}
+			       ;
 
 function_body      : var_decl subprogram_list func_complex_cmd SY_SEMICOLON                                             { $$ = template("\n%s%s%s",$1,$2,$3);}
-			       | var_decl subprogram_list complex_cmd SY_SEMICOLON                                             		{ $$ = template("\n%s%s",$1,$2);yyerror(SE"return expected\n");YYABORT;}
-			       ;
+			       | var_decl subprogram_list complex_cmd SY_SEMICOLON                                             		{ yyerror(SE"return expected\n");}
+			       | var_decl subprogram_list  error 																	{ yyerror(SE"Complex command expected\n");}
+			       | var_decl subprogram_list func_complex_cmd error   													{ yyerror(SE"semicolon expected at end of function body\n");} ;
+				   ;
 
 
 
@@ -332,7 +357,8 @@ all_commands       : complex_cmd // Complex Comands or just a simple command
                    ;
 
 complex_cmd        : KW_BEGIN cmd_list KW_END                                                                           { $$ = template("\n%s\n",$2) ;}//Only complex commands "BEGIN foo END"
-			 ; 
+			 	  // | KW_BEGIN cmd_list error  		{ yyerror(SE" Keyword 'end' expected");}
+			 	   ; 
 
 func_complex_cmd   : KW_BEGIN cmd_list SY_SEMICOLON return_cmd KW_END													{ $$ = template("\n%s\n%s",$2,$4) ;} // when we have a funciton we expect a return
 
@@ -340,6 +366,7 @@ func_complex_cmd   : KW_BEGIN cmd_list SY_SEMICOLON return_cmd KW_END											
 cmd_list           : %empty                                                                                             { $$ = "";} //list of simple commands
                    | simple_cmd 																							
                    | cmd_list SY_SEMICOLON simple_cmd                                                                   { $$ = template("%s\n%s",$1,$3) ;}
+                   //| error SY_SEMICOLON 		{ yyerror(SE"wrong command\n");}
                    ;
 
 
@@ -348,14 +375,14 @@ simple_cmd         : IDENT SY_ASSIGN expression                                 
                    | if_cmd                                                                                             { $$ = $1;}
                    | for_cmd                                                                                            { $$ = $1;}
                    | while_cmd                                                                                          { $$ = template("%s;",$1);}
-                   | IDENT SY_COLON all_commands                                                                        { $$ = template("%s: %s;",$1,$3);} //TODO does all_commands need brackets in labels ?
+                   | IDENT SY_COLON all_commands                                                                        { $$ = template("%s: %s;",$1,$3);} //TODO does all_commands need brackets in labels ? // no but it accepts them
                    | KW_GOTO IDENT                                                                                      { $$ = template("goto %s;",$2);}
                    | IDENT SY_LEFT_BRACKET arglist                                                                      { $$ = template("%s(%s)\n;",$1,$3);}
                    | proc_call                                                                                          { $$ = template("%s;", $1); }
                    ;
 
 return_cmd 		   : KW_RETURN                                          												{ $$ = template("return result;");};
-
+				   | KW_RETURN error  																					{ yyerror(SE"error after return\n"); };
 /*Processes and functions call*/
 proc_call          : IDENT SY_LEFT_BRACKET arguments SY_RIGHT_BRACKET                                                   { $$ = template("%s(%s)", $1, $3); } /* identifier (arguments)*/
 			 ;
@@ -363,22 +390,30 @@ proc_call          : IDENT SY_LEFT_BRACKET arguments SY_RIGHT_BRACKET           
 /*While Loop*/
 while_cmd          : KW_WHILE expression KW_DO all_commands                                                             { $$ =template("while(%s){%s}",$2,$4);}
                    | KW_REPEAT all_commands KW_UNTIL expression                                                         { $$ =template("do{%s}\nwhile(%s)",$2,$4);}
+                   | KW_WHILE expression  all_commands  																{ yyerror(SE"Keyword 'do' expected\n");}
+                   | KW_REPEAT error 																					{ yyerror(SE"error at repeat command\n");} 
                    ;
 
 /*For Loop*/
 for_cmd            : KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO all_commands                              { $$ =template("for(%s=%s; %s<%s; %s++){\n\t%s\n}",$2,$4,$2,$6,$2,$8); }
                    | KW_FOR IDENT SY_ASSIGN expression KW_DOWNTO expression KW_DO all_commands                          { $$ =template("for(%s=%s; %s>%s; %s--){\n\t%s\n}",$2,$4,$2,$6,$2,$8); }
+                 //  | KW_FOR IDENT SY_ASSIGN expression KW_TO expression KW_DO 											{ yyerror(SE" complex_cmd expected\n");}
+                   | KW_FOR IDENT SY_ASSIGN expression KW_TO expression all_commands 									{ yyerror(SE" Keyword 'DO' expected\n");}
+                   | KW_FOR IDENT SY_ASSIGN expression KW_TO expression error											{ yyerror(SE" error at for loop\n");}
+                   | KW_FOR IDENT SY_ASSIGN expression error  KW_DO all_commands 										{ yyerror(SE"Keyword 'TO' or 'DOWNTO' expected\n");}
+                   | KW_FOR IDENT  expression KW_TO expression KW_DO all_commands 										{ yyerror(SE"Assign missing\n");}
+                   | KW_FOR IDENT error expression KW_TO expression KW_DO all_commands 									{ yyerror(SE"Assignment error\n");}
+                   | KW_FOR IDENT error {yyerror(SE"error at for loop\n");}
+                   | KW_FOR  error {yyerror(SE"error at for loop\n");}
                    ;
 
 
-if_cmd		 : KW_IF expression KW_THEN all_commands                                 				    	{ $$ = template("if(%s){\n\t%s}\n",$2,$4);}            
-			 | KW_IF expression KW_THEN all_commands KW_ELSE all_commands                              		{ $$ = template("if(%s){\n\t%s}\nelse{\n%s}",$2,$4,$6);}
-			 ;				   
+if_cmd		 	   : KW_IF expression KW_THEN all_commands                                 				    			{ $$ = template("if(%s){\n\t%s}\n",$2,$4);}            
+			 	   | KW_IF expression KW_THEN all_commands KW_ELSE all_commands                              			{ $$ = template("if(%s){\n\t%s}\nelse{\n%s}",$2,$4,$6);}
+			 	   | KW_IF  error 																						{yyerror(SE"error at if statement\n");}
+			 	  // | KW_IF expression KW_THEN all_commands KW_ELSE error  	{yyerror(SE"error at else statement\n");}
+			 	   ;				   
 
 %%
-/*
-int main()                                                                                                              {
-	yyparse();
-}
-*/
+
 

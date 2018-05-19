@@ -1,0 +1,93 @@
+program foo ;
+
+	type
+		string =  array of char;
+	(*    string1 =  array of char.
+		string2 =  ;
+		string3   array of char;
+		c = alsfdhjadvn ..;
+		string4 = array;
+		string5= function(
+		*)
+	var
+		x :string ;
+	(*	x1: array;
+		x2: array [asd ]of integer; 
+		
+		x3: array[;
+	*)
+	(*
+	procedure  
+	begin
+		x := 'Hello world\n'
+	end
+	
+	procedure a
+	begin
+		x := 'Hello world\n'
+	end;
+	
+	procedure a1(
+	begin
+		x := 'Hello world\n'
+	end;
+	
+	procedure a1();
+	begin
+		x := 'Hello world\n'
+	end;
+
+	function
+	begin
+	result := 1
+	end;
+
+	function f1
+	begin
+	result := 1
+	end;
+	
+	function f2(
+	begin
+	result := 1
+	end;
+	
+	function f3();
+	begin
+	result := 1
+	end;
+	
+	function f4():char
+	begin
+	result := 1
+	end;
+*)
+	function foo() : integer;
+	begin
+	result := 1;
+	return 
+	end;
+	
+begin
+	
+	while x<5  do begin 
+	x := 'Hello world\n'
+	end;
+	
+//repeat x := 'Hello world\n' until;
+	
+	for i:=0 to 5 do
+	begin
+	 	i:=5 
+	end;
+ 
+	if a=3 then a:=4 else.
+
+	x := 'Hello world\n';
+	x := foo(asd);
+	writeString(x)
+	
+
+end.
+
+
