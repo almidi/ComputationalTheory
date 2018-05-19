@@ -98,7 +98,7 @@ extern int line_num;
 
 %type <crepr> return_type function_header function_body
 %type <crepr> args_decl args_decl_list  procedure_body subprogram subprogram_list procedure_header args_decl_excl args_decl_excl_list
-%type <crepr> cmd_list all_commands complex_cmd simple_cmd  for_cmd while_cmd  if_cmd   
+%type <crepr> cmd_list all_commands complex_cmd simple_cmd  for_cmd while_cmd  if_cmd  func_complex_cmd return_cmd 
 
 
 %%
@@ -145,24 +145,24 @@ arglist            : expression                                                 
 unary_exp          : SY_DASH 						expression                                                  { $$ = template("+%s", $2);}
                    | SY_NOT 						expression                                                  { $$ = template("-%s", $2);}
                    | expression 					KW_NOT                                                      { $$ = template("%s!", $1);}
-                   | expression                             SY_NOT                                                      { $$ = template("%s!", $1);}
-                   | SY_LEFT_BRACKET simple_data_type SY_RIGHT_BRACKET expression                                       { $$ = template("(%s)%s",$2,$4);}//Casting
+                   | expression                     SY_NOT		                                                { $$ = template("%s!", $1);}
+                   | SY_LEFT_BRACKET simple_data_type SY_RIGHT_BRACKET expression                               { $$ = template("(%s)%s",$2,$4);}//Casting
                    ; 
                   
 
 binary_exp         : expression SY_DASH				expression                                                  { $$ = template("%s-%s" , $1, $3);};
                    | expression SY_PLUS				expression                                                  { $$ = template("%s+%s" , $1, $3);};
                    | expression SY_STAR				expression                                                  { $$ = template("%s*%s" , $1, $3);};
-                   | expression SY_SLASH			      expression                                                  { $$ = template("%s/%s" , $1, $3);};
-                   | expression SY_EQUALS			      expression                                                  { $$ = template("%s==%s" , $1, $3);};
+                   | expression SY_SLASH			expression                                                  { $$ = template("%s/%s" , $1, $3);};
+                   | expression SY_EQUALS			expression                                                  { $$ = template("%s==%s" , $1, $3);};
                    | expression SY_LESS				expression                                                  { $$ = template("%s<%s" , $1, $3);};
                    | expression SY_GREATER			expression                                                  { $$ = template("%s>%s" , $1, $3);};
-                   | expression SY_LESS_EQUALS		      expression                                                  { $$ = template("%s<=%s", $1, $3);};
-                   | expression SY_GREATER_EQUALS	      expression                                                  { $$ = template("%s<>%s", $1, $3);};
-                   | expression SY_LESS_BIGGER		      expression                                                  { $$ = template("%s>=%s", $1, $3);};
+                   | expression SY_LESS_EQUALS		expression                                                  { $$ = template("%s<=%s", $1, $3);};
+                   | expression SY_GREATER_EQUALS	expression                                                  { $$ = template("%s<>%s", $1, $3);};
+                   | expression SY_LESS_BIGGER		expression                                                  { $$ = template("%s>=%s", $1, $3);};
                    | expression SY_AND				expression                                                  { $$ = template("%s&&%s", $1, $3);};
-                   | expression SY_OR                       expression                                                  { $$ = template("%s||%s", $1, $3);};
-                   | expression SY_ASSIGN                   expression                                                  { $$ = template("%s:=%s", $1, $3);};
+                   | expression SY_OR               expression                                                  { $$ = template("%s||%s", $1, $3);};
+                   | expression SY_ASSIGN           expression                                                  { $$ = template("%s:=%s", $1, $3);};
                    | expression KW_AND				expression                                                  { $$ = template("%s&&%s", $1, $3);};
                    | expression KW_DIV				expression                                                  { $$ = template("%s/%s" , $1, $3);};
                    | expression KW_MOD				expression                                                  { $$ = template("%s %% %s" , $1, $3);}
@@ -172,7 +172,7 @@ binary_exp         : expression SY_DASH				expression                           
 expression         : POSINT
                    | REAL							
                    | STRING                                                                                             { $$ = string_ptuc2c($1); };
-	             | BOOL 							
+	               | BOOL 							
                    | IDENT
                    | KW_RESULT                                                                                          { $$ = "result";}
                    | SY_LEFT_BRACKET expression SY_RIGHT_BRACKET                                                        { $$ = $2;} /* needs fixing for precedence */
@@ -264,7 +264,7 @@ procedure_header   : KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACK
 
 
 //function_header  
-function_header    : KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON function_body{ $$ = template("%s %s(%s){\n %s result; %s\n return result;}\n",$6,$2,$4,$6,$8);}
+function_header    : KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON function_body{ $$ = template("%s %s(%s){\n %s result; %s\n }\n",$6,$2,$4,$6,$8);}
 			 ;
 
 //Arguments Declaration demanding argument names
@@ -319,8 +319,9 @@ procedure_body     : var_decl subprogram_list complex_cmd SY_SEMICOLON          
 			 ;
 
 
-function_body      : var_decl subprogram_list complex_cmd SY_SEMICOLON                                                  { $$ = template("\n%s%s%s",$1,$2,$3);}
-			 ;
+function_body      : var_decl subprogram_list func_complex_cmd SY_SEMICOLON                                             { $$ = template("\n%s%s%s",$1,$2,$3);}
+			       | var_decl subprogram_list complex_cmd SY_SEMICOLON                                             		{ $$ = template("\n%s%s",$1,$2);yyerror(SE"return expected\n");YYABORT;}
+			       ;
 
 
 
@@ -333,10 +334,12 @@ all_commands       : complex_cmd // Complex Comands or just a simple command
 complex_cmd        : KW_BEGIN cmd_list KW_END                                                                           { $$ = template("\n%s\n",$2) ;}//Only complex commands "BEGIN foo END"
 			 ; 
 
+func_complex_cmd   : KW_BEGIN cmd_list SY_SEMICOLON return_cmd KW_END													{ $$ = template("\n%s\n%s",$2,$4) ;} // when we have a funciton we expect a return
+
 
 cmd_list           : %empty                                                                                             { $$ = "";} //list of simple commands
-                   |simple_cmd 																							
-                   |cmd_list SY_SEMICOLON simple_cmd                                                                    { $$ = template("%s\n%s",$1,$3) ;}
+                   | simple_cmd 																							
+                   | cmd_list SY_SEMICOLON simple_cmd                                                                   { $$ = template("%s\n%s",$1,$3) ;}
                    ;
 
 
@@ -347,10 +350,11 @@ simple_cmd         : IDENT SY_ASSIGN expression                                 
                    | while_cmd                                                                                          { $$ = template("%s;",$1);}
                    | IDENT SY_COLON all_commands                                                                        { $$ = template("%s: %s;",$1,$3);} //TODO does all_commands need brackets in labels ?
                    | KW_GOTO IDENT                                                                                      { $$ = template("goto %s;",$2);}
-                   | KW_RETURN                                                                                          { $$ = template("return result;");}
                    | IDENT SY_LEFT_BRACKET arglist                                                                      { $$ = template("%s(%s)\n;",$1,$3);}
                    | proc_call                                                                                          { $$ = template("%s;", $1); }
                    ;
+
+return_cmd 		   : KW_RETURN                                          												{ $$ = template("return result;");};
 
 /*Processes and functions call*/
 proc_call          : IDENT SY_LEFT_BRACKET arguments SY_RIGHT_BRACKET                                                   { $$ = template("%s(%s)", $1, $3); } /* identifier (arguments)*/
