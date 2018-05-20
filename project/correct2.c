@@ -5,7 +5,7 @@
 
 typedef char* string;
 
-int x1,y,n,dummy_choice;
+int x1,y,n,tmp,dummy_choice;
  double array1[5];
  int b1;
 
@@ -38,6 +38,21 @@ else{
 writeString("Ooops, no integer here\n");
 }
 }
+void something (int y){
+
+if(y % 2==0){
+	
+writeString("Number ");
+writeInteger(y);
+writeString(" is even\n");
+}
+else{
+
+writeString("Number ");
+writeInteger(y);
+writeString(" is odd\n");
+}
+}
 int positive_power(int n, int x){
  int result; 
 int i,y,z;
@@ -52,24 +67,8 @@ y=y*x;
 else{
 y=1;}
 result=y;
-something(y);
 return result;
  }
-void something (int y){
-
-if(y % 2==0){
-	
-writeString("Number ");
-writeInteger(y);
-writeString(" is even\n");
-}
-else{
-
-writeString("Number ");
-writeInteger(y);
-writeString(" is even\n");
-}
-}
 int dummy_check(){
  int result; 
 int choice;
@@ -113,7 +112,9 @@ writeInteger(x1);
 writeString("^");
 writeInteger(y);
 writeString("=");
-writeInteger(positive_power(y,x1));
+tmp=positive_power(y,x1);
+writeInteger(tmp);
 nl();
+something(tmp);
 label2: writeString("End of program, Goodbye");;
 } 

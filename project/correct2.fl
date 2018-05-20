@@ -6,7 +6,7 @@ type
  	string = array of char;
 
 var 
-	x1,y,n, dummy_choice : integer;
+	x1,y,n,tmp, dummy_choice : integer;
 	array1: array [5] of real;
 	b1 : boolean; 
 
@@ -38,23 +38,6 @@ end
 end;	
 
 
-function positive_power(n: integer; x: integer): integer;
-var i,y,z: integer;
-begin
-	y:=1;
-	if(n>=0) then
-		for i:=0 to n do 
-		begin
-			
-			y:=y*x
-		end
-	else y:=1;
-	result := y; 
-	something(y);
-	return
-end;
-
-
 procedure something(y : integer);
 begin
 	if y mod 2 = 0 then 
@@ -70,6 +53,23 @@ begin
 	end
 
 end;
+
+
+function positive_power(n: integer; x: integer): integer;
+var i,y,z: integer;
+begin
+	y:=1;
+	if(n>=0) then
+		for i:=0 to n do 
+		begin
+			
+			y:=y*x
+		end
+	else y:=1;
+	result := y; 
+	return
+end;
+
 
 
 function dummy_check():integer;
@@ -108,9 +108,10 @@ label1:
 	writeString("^");
 	writeInteger(y);
 	writeString("=");
-	writeInteger(positive_power(y,x1));
+	tmp:=positive_power(y,x1);
+	writeInteger(tmp);
 	nl();
-
+	something(tmp);
 label2:
-	writeString("End of program, Goodbye")
+	writeString("End of program, Goodbye\n")
 end.
