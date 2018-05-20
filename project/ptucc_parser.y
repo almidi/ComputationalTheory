@@ -164,8 +164,8 @@ binary_exp         : expression SY_DASH				expression                           
                    | expression SY_LESS				expression                                                  { $$ = template("%s<%s" , $1, $3);};
                    | expression SY_GREATER			expression                                                  { $$ = template("%s>%s" , $1, $3);};
                    | expression SY_LESS_EQUALS		expression                                                  { $$ = template("%s<=%s", $1, $3);};
-                   | expression SY_GREATER_EQUALS	expression                                                  { $$ = template("%s<>%s", $1, $3);};
-                   | expression SY_LESS_BIGGER		expression                                                  { $$ = template("%s>=%s", $1, $3);};
+                   | expression SY_GREATER_EQUALS	expression                                                  { $$ = template("%s>=%s", $1, $3);};
+                   | expression SY_LESS_BIGGER		expression                                                  { $$ = template("%s!=%s", $1, $3);};
                    | expression SY_AND				expression                                                  { $$ = template("%s&&%s", $1, $3);};
                    | expression SY_OR               expression                                                  { $$ = template("%s||%s", $1, $3);};
                    | expression SY_ASSIGN           expression                                                  { $$ = template("%s:=%s", $1, $3);};
@@ -393,7 +393,7 @@ proc_call          : IDENT SY_LEFT_BRACKET arguments SY_RIGHT_BRACKET           
 while_cmd          : KW_WHILE expression KW_DO all_commands                                                             { $$ =template("while(%s){%s}",$2,$4);}
                    | KW_REPEAT all_commands KW_UNTIL expression                                                         { $$ =template("do{%s}\nwhile(%s)",$2,$4);}
                    | KW_WHILE expression  all_commands  																{ yyerror(SE"Keyword 'do' expected\n");}
-                   | KW_REPEAT error 																					{ yyerror(SE"error at repeat command\n");} 
+                   //| KW_REPEAT error 																					{ yyerror(SE"error at repeat command\n");} 
                    ;
 
 /*For Loop*/

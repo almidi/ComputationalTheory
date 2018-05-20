@@ -1175,12 +1175,12 @@ return SY_LESS_EQUALS;
 case 45:
 YY_RULE_SETUP
 #line 148 "ptucc_lex.l"
-return SY_GREATER_EQUALS;
+return SY_LESS_BIGGER;
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
 #line 149 "ptucc_lex.l"
-return SY_LESS_BIGGER;
+return SY_GREATER_EQUALS;
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
