@@ -1,0 +1,79 @@
+program function_fun;
+
+type
+   intfunc = function(n: integer) : integer;
+   string = array of char;
+
+var v1 : function():integer;
+	v2 : array [2][3][4][5] of real;
+	v3,v4 : boolean;
+	v5 ,i: integer;
+
+procedure nl();
+begin 
+	writeString('\n')
+end;
+
+procedure p1(); 
+var v5,i,v3 : integer;
+	v4 : real;
+begin
+v3:=5;
+v5:=2;
+v5:=(integer)v4;
+for i:=0 to 4 do
+begin
+	v5:=v5+1;
+	v5:= v3*v5
+end;
+v3:=v5 mod i;
+writeInteger(v3)
+end;
+
+
+function fibonacci(n:integer) : integer;
+var
+	f0, f1, temp: integer;
+begin
+	f0:=0;
+	f1:=1;
+	while n>1 do
+		begin
+			temp := f1;
+			f1 := f1+f0;
+			f0 := temp;
+			n := n-1
+		end;
+	result := f1;
+	return
+end;
+
+function factorial(n:integer) : integer;
+var
+	fac, i: integer;
+begin
+	fac := 1; 
+	for i:=n downto 1 do fac:=i*fac;
+	result := fac;
+	return
+end;
+
+procedure eval(prompt: string; f: intfunc; val: integer);
+begin
+ 	writeString('Call p1 : ');
+	p1();
+	nl();
+	writeString(prompt); 
+	writeString('('); writeInteger(val); writeString(')=');
+	writeInteger(f(val));
+	writeString('\n')
+end;
+
+begin
+	for i:=5 downto 2 do
+	begin
+	eval('Fibonacci', fibonacci, i);
+	eval('factorial', factorial, i-1)
+	end
+end.
+

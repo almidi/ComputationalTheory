@@ -245,13 +245,15 @@ simple_data_type   : KW_INTEGER                                                 
 
 var_decl           : %empty                                                                                             { $$ = ""; } 
                    | KW_VAR var_decl_list SY_SEMICOLON                                                                  { $$ = $2; }
-                   | KW_VAR var_decl_list error   {yyerror("var decl semicolon expected\n");} 
+                 //   | KW_VAR var_decl_list error   {yyerror("var decl semicolon expected\n");} 
                    ;
 
-var_decl_list      : var_list SY_COLON advanced_data_type                                                               { $$ = template("%s %s;\n",$3 ,$1);}
+var_decl_list      : var_list SY_COLON simple_data_type                                                               { $$ = template("%s %s;\n",$3 ,$1);}
                    | var_list SY_COLON adv_func_data_type                                                               { $$ = template("%s;\n",func_spread($1,$3[0],$3[1], ";"));}
-                   | var_decl_list SY_SEMICOLON var_list SY_COLON advanced_data_type                                    { $$ = template("%s %s %s;\n",$1, $5 ,$3);} //////////needs treatment
+                   | var_decl_list SY_SEMICOLON var_list SY_COLON simple_data_type                                    { $$ = template("%s %s %s;\n",$1, $5 ,$3);} //////////needs treatment
                    | var_decl_list SY_SEMICOLON var_list SY_COLON adv_func_data_type                                    { $$ = template("%s %s;\n",$1, func_spread($3,$5[0],$5[1], ";") );} //////////needs treatment
+                   | var_list SY_COLON KW_ARRAY matrix_n KW_OF simple_data_type											{ $$ = template("%s %s%s;\n",$6,$1,$4);}
+                   | var_decl_list SY_SEMICOLON var_list SY_COLON KW_ARRAY matrix_n KW_OF simple_data_type				{ $$ = template("%s %s %s%s;\n",$1,$8,$3,$6);}
                    | var_list SY_COLON     									 	{yyerror("data type expected\n");}
                     ;
 
@@ -282,7 +284,7 @@ procedure_header   : KW_PROCEDURE IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACK
 			 	   | KW_PROCEDURE error 								 				 								{yyerror(SE"procedure declaration incomplete\n");} ;
 //function_header  
 function_header    : KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type SY_SEMICOLON function_body { $$ = template("%s %s(%s){\n %s result; %s\n }\n",$6,$2,$4,$6,$8);}
-				   //| KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type error 					 {yyerror(SE"semicolon expected at funciton declaration\n");} ;
+				   | KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl SY_RIGHT_BRACKET return_type error 					 {yyerror(SE"semicolon expected at funciton declaration\n");} ;
 			 	   | KW_FUNCTION IDENT SY_LEFT_BRACKET args_decl  error 												 {yyerror(SE"')' expected at funciton declaration\n");} ;
 			 	   | KW_FUNCTION IDENT  error 																			 {yyerror(SE"'(argumetns);' expected at funciton declaration\n");} ;
 			 	   | KW_FUNCTION error 																					 {yyerror(SE"funciton declaration incomplete\n");} ;
