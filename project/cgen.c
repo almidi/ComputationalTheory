@@ -147,38 +147,61 @@ char* string_ptuc2c(char* P)
 }
 
 //Spread funcrion declarations and variables for C compatibility
-char* func_spread(char* strt,char* type,char* vars, char* del) {
+char* func_spread(char* idents,char* type,char* args, char* del) {
     sstream S;
     ssopen(&S);
 
     fprintf(S.stream, "%s (*",type);
-    for(int i =0 ; i < strlen(strt);i++){
-        if(strt[i] == ','){
-            fprintf(S.stream, ")(%s)%s %s (*",vars,del,type);
+    for(int i =0 ; i < strlen(idents);i++){
+        if(idents[i] == ','){
+            fprintf(S.stream, ")(%s) %s %s (*",args,del,type);
         }
         else{
-            fprintf(S.stream, "%c", strt[i] );
+            fprintf(S.stream, "%c", idents[i] );
         }
     }
-    fprintf(S.stream, ")(%s)",vars);
+    fprintf(S.stream, ")(%s)",args);
     char* ret = ssvalue(&S);
     ssclose(&S);
 
     return ret;
 }
 
-//Spread variables for C compatibility
-char* vars_spread(char* strt,char* type, char* del) {
+//Spread matrix declarations for C compatibility
+char* matrix_spread(char* idents,char* type,char* matrix, char* del) {
     sstream S;
     ssopen(&S);
 
     fprintf(S.stream, "%s ",type);
-    for(int i =0 ; i < strlen(strt);i++){
-        if(strt[i] == ','){
+    for(int i =0 ; i < strlen(idents);i++){
+        if(idents[i] == ','){
+            fprintf(S.stream, "%s %s %s ",matrix,del,type);
+        }
+        else{
+            fprintf(S.stream, "%c", idents[i] );
+        }
+    }
+    fprintf(S.stream, "%s",matrix);
+    char* ret = ssvalue(&S);
+    ssclose(&S);
+
+    return ret;
+}
+
+
+
+//Spread variables for C compatibility
+char* vars_spread(char* idents,char* type, char* del) {
+    sstream S;
+    ssopen(&S);
+
+    fprintf(S.stream, "%s ",type);
+    for(int i =0 ; i < strlen(idents);i++){
+        if(idents[i] == ','){
             fprintf(S.stream, "%s %s ",del,type);
         }
         else{
-            fprintf(S.stream, "%c", strt[i] );
+            fprintf(S.stream, "%c", idents[i] );
         }
     }
     char* ret = ssvalue(&S);
@@ -188,6 +211,19 @@ char* vars_spread(char* strt,char* type, char* del) {
 }
 
 
+char* data_spread(char* adv_data[3],char* idents, char* del){
+	if(adv_data[2][0] == 's'){
+		return vars_spread(idents,adv_data[0],del);
+	}
+	else if(adv_data[2][0] == 'f'){
+		return func_spread(idents,adv_data[0],adv_data[1],del);
+	}
+	else if(adv_data[2][0] == 'm'){
+		return matrix_spread(idents,adv_data[0],adv_data[1],del);
+	} 
+	yyerror(SE"Advanced Data Error");
+	return NULL;
+}
 
 
 /*

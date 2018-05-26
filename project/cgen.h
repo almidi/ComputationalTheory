@@ -54,10 +54,12 @@ extern const char* c_prologue;
 char* string_ptuc2c(char* P);
 
 //Spread funcrion declarations and variables for C compatibility
-char* func_spread(char* strt,char* type,char* vars, char* del) ;
+char* func_spread(char* idents,char* type,char* args, char* del) ;
 
 //Spread variables for C compatibility
-char* vars_spread(char* strt,char* type, char* del) ;
+char* vars_spread(char* idents,char* type, char* del) ;
+
+char* data_spread(char* adv_data[3],char* idents, char* del);
 
 /* Return 1 on success, 0 on failure (def table full) */
 int set_def(char* def);

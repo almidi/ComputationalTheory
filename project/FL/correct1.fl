@@ -8,6 +8,7 @@ var v1 : function():integer;
 	v2 : array [2][3][4][5] of real;
 	v3,v4 : boolean;
 	v5 ,i: integer;
+	v6,v7 : array [5] of integer;
 
 procedure nl();
 begin 
@@ -69,11 +70,34 @@ begin
 	writeString('\n')
 end;
 
+procedure array_check(array1: array [5] of integer);
+var i: integer;
 begin
+
+	for i:= 4 downto 0 do
+	begin
+		array1[i]:= -array1[i];
+		writeInteger(array1[i]);
+		writeString(" ")
+	end
+end;
+
+begin
+	writeString("5 numbers :\n");
+	for i:= 0 to 4 do
+	begin
+		v6[i]:= i ;
+		v7[i]:= v6[i];
+		writeInteger(v6[i])
+	end;
+	nl();
+	writeString("5 numbers inversed in reversed order\n");
+	array_check(v6);
+	nl();
 	for i:=5 downto 2 do
 	begin
-	eval('Fibonacci', fibonacci, i);
-	eval('factorial', factorial, i-1)
+		eval('Fibonacci', fibonacci, i);
+		eval('factorial', factorial, i-1)
 	end
 end.
 

@@ -76,49 +76,67 @@ testall: ptucc
 		 @cp ./ptuclib.h ./ptuc_c/ptuclib.h
 
 		 @printf "\n------------------sample001------------------\n"
-		 @./ptucc < sample001.fl > ./ptuc_c/sample001.c
+		 @./ptucc < ./FL/sample001.fl > ./ptuc_c/sample001.c
 		 @gcc -Wall -std=c11 -o ./bin/sample001 ./ptuc_c/sample001.c
 		 @./bin/sample001 
 
 		 @printf "\n------------------sample002------------------\n"
-		 @./ptucc < sample002.fl > ./ptuc_c/sample002.c
+		 @./ptucc < ./FL/sample002.fl > ./ptuc_c/sample002.c
 		 @gcc -Wall -std=c11 -o ./bin/sample002 ./ptuc_c/sample002.c
 		 @./bin/sample002 
 
 		 @printf "\n------------------sample003------------------\n"
-		 @./ptucc < sample003.fl > ./ptuc_c/sample003.c
+		 @./ptucc < ./FL/sample003.fl > ./ptuc_c/sample003.c
 		 @gcc -Wall -std=c11 -o ./bin/sample003 ./ptuc_c/sample003.c
 		 @./bin/sample003 
 
 		 @printf "\n------------------sample004------------------\n"
-		 @./ptucc < sample004.fl > ./ptuc_c/sample004.c
+		 @./ptucc < ./FL/sample004.fl > ./ptuc_c/sample004.c
 		 @gcc -Wall -std=c11 -o ./bin/sample004 ./ptuc_c/sample004.c
 		 @./bin/sample004 
 
 		 @printf "\n------------------sample005------------------\n"
-		 @./ptucc < sample005.fl > ./ptuc_c/sample005.c
+		 @./ptucc < ./FL/sample005.fl > ./ptuc_c/sample005.c
 		 @gcc -Wall -std=c11 -o ./bin/sample005 ./ptuc_c/sample005.c
 		 @./bin/sample005
 
 		 @printf "\n------------------sample006------------------\n"
-		 @./ptucc < sample006.fl > ./ptuc_c/sample006.c
+		 @./ptucc < ./FL/sample006.fl > ./ptuc_c/sample006.c
 		 @gcc -Wall -std=c11 -o ./bin/sample006 ./ptuc_c/sample006.c
 		 @./bin/sample006
 
 		 @printf "\n\n-------------------bad001--------------------\n"
-		 -@./ptucc < bad001.fl > ./ptuc_c/bad001.c
+		 -@./ptucc < ./FL/bad001.fl > ./ptuc_c/bad001.c
 
 		 @printf "\n\n-------------------bad002--------------------\n"
-		 -@./ptucc < bad002.fl > ./ptuc_c/bad002.c
+		 -@./ptucc < ./FL/bad002.fl > ./ptuc_c/bad002.c
 
 		 @printf "\n\n-------------------bad003--------------------\n"
-		 -@./ptucc < bad003.fl > ./ptuc_c/bad003.c
+		 -@./ptucc < ./FL/bad003.fl > ./ptuc_c/bad003.c
 
 		 @printf "\n\n-------------------bad004--------------------\n"
-		 -@./ptucc < bad004.fl > ./ptuc_c/bad004.c
+		 -@./ptucc < ./FL/bad004.fl > ./ptuc_c/bad004.c
 
 		 @printf "\n\n-------------------bad005--------------------\n"
-		 -@./ptucc < bad005.fl > ./ptuc_c/bad005.c
+		 -@./ptucc < ./FL/bad005.fl > ./ptuc_c/bad005.c
+
+		 @printf "\n------------------correct1------------------\n"
+		 @./ptucc < ./FL/correct1.fl > ./ptuc_c/correct1.c
+		 @gcc -Wall -std=c11 -o ./bin/correct1 ./ptuc_c/correct1.c
+	     @./bin/correct1
+
+		 @printf "\n------------------correct2------------------\n"
+		 @./ptucc < ./FL/correct2.fl > ./ptuc_c/correct2.c
+		 @gcc -Wall -std=c11 -o ./bin/correct2 ./ptuc_c/correct2.c
+		 @./bin/correct2
+
+		 @printf "\n\n-------------------wrong1--------------------\n"
+		 -@./ptucc < ./FL/wrong1.fl > ./ptuc_c/wrong1.c
+
+		 @printf "\n\n-------------------wrong2--------------------\n"
+		 -@./ptucc < ./FL/wrong2.fl > ./ptuc_c/wrong2.c
+
+
 
 
 

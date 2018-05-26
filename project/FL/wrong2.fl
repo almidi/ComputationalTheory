@@ -5,9 +5,10 @@ program Correct;
 type
  	string = array of char;
 
-var 
+var array1: array [5] of real;
 	x1,y,n,tmp, dummy_choice : integer;
-	array1: array [5] of real;
+	f : function(integer):integer;
+	
 	b1 : boolean; 
 
 
@@ -16,7 +17,7 @@ begin
 	writeString('\n')
 end;
 
-procedure print(a : integer;c: integer;b: boolean;d:boolean);
+procedure print(a,c: integer; b,d:boolean);
 begin
 
 if b<>false || d = true then
@@ -25,7 +26,7 @@ begin
 	if (b=1) then 
 	begin writeInteger(a); nl() end
 	else begin 
-		if (d=1) then 
+		if (d=1,) then ///////////////////////////
 		begin
 			writeInteger(c);
 			nl()
